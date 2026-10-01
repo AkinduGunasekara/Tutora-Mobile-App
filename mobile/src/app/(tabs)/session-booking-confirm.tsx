@@ -7,7 +7,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
-import { Primary, Spacing } from '@/constants/theme';
+
+const PAGE  = '#EFEDDC';
+const INK   = '#171943';
+const TEAL  = '#008C91';
+const MUTED = '#78809A';
+const CARD  = '#FFFFFF';
 
 function getInitials(name: string = '') {
   return name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
@@ -32,8 +37,8 @@ export default function SessionBookingConfirmScreen() {
   }>();
   const { sessionId } = params;
 
-  const [session, setSession]   = useState<any>(null);
-  const [loading, setLoading]   = useState(true);
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -41,7 +46,6 @@ export default function SessionBookingConfirmScreen() {
         const { data } = await api.get(`/session/${sessionId}`);
         setSession(data);
       } catch {
-        // Use fallback params from navigation if session not in DB (dummy/mock flow)
         setSession(null);
       } finally {
         setLoading(false);
@@ -51,92 +55,81 @@ export default function SessionBookingConfirmScreen() {
     else setLoading(false);
   }, [sessionId]);
 
-  // Build display data — real session takes priority, fallback to route params
-  const tutorName    = session?.tutor?.name      ?? params.tutorName    ?? 'Your Tutor';
-  const subject      = session?.subject          ?? params.subject       ?? 'General';
-  const durationHrs  = session?.durationHours    ?? parseFloat(params.durationHours ?? '1');
-  const totalAmount  = session?.totalAmount      ?? (() => {
+  const tutorName   = session?.tutor?.name   ?? params.tutorName    ?? 'Your Tutor';
+  const subject     = session?.subject        ?? params.subject       ?? 'General';
+  const durationHrs = session?.durationHours  ?? parseFloat(params.durationHours ?? '1');
+  const totalAmount = session?.totalAmount    ?? (() => {
     const rate = parseFloat(params.hourlyRate ?? '0');
     const hrs  = parseFloat(params.durationHours ?? '1');
     return rate * hrs * 1.05;
   })();
-  const method       = session?.paymentMethod    ?? params.paymentMethod ?? 'card';
-  const scheduled    = session?.scheduledDate    ?? params.scheduledDate ?? new Date().toISOString();
-  const isVerified   = session?.tutor?.isVerified ?? false;
+  const method      = session?.paymentMethod  ?? params.paymentMethod ?? 'card';
+  const scheduled   = session?.scheduledDate  ?? params.scheduledDate ?? new Date().toISOString();
+  const isVerified  = session?.tutor?.isVerified ?? false;
 
   if (loading) return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.loadingWrap}>
-        <ActivityIndicator size="large" color={Primary} />
+        <ActivityIndicator size="large" color={TEAL} />
       </View>
     </SafeAreaView>
   );
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Top bar */}
-      <View style={styles.topbar}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Text style={styles.backIcon}>{'<'}</Text>
         </Pressable>
-        <View style={styles.topbarCenter}>
-          <Text style={styles.topbarTitle}>Booking Confirmed</Text>
-        </View>
+        <Text style={styles.headerTitle}>Booking Confirmed</Text>
         <View style={styles.confirmedPill}>
-          <Text style={styles.confirmedText}>✓ Confirmed</Text>
+          <Text style={styles.confirmedText}>Confirmed</Text>
         </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* Tutor card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>YOUR TUTOR</Text>
+          <Text style={styles.sectionLabel}>YOUR TUTOR</Text>
           <View style={styles.tutorRow}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{getInitials(tutorName)}</Text>
             </View>
             <View style={styles.tutorInfo}>
-              <View style={styles.tutorNameRow}>
+              <View style={styles.nameRow}>
                 <Text style={styles.tutorName}>{tutorName}</Text>
-                {isVerified && (
-                  <View style={styles.verifiedBadge}>
-                    <Text style={styles.verifiedText}>✓ Verified</Text>
-                  </View>
-                )}
+                {isVerified && <View style={styles.verifiedBadge}><Text style={styles.verifiedText}>Verified</Text></View>}
               </View>
-              <View style={styles.subjectPill}>
-                <Text style={styles.subjectText}>{subject}</Text>
-              </View>
+              <Text style={styles.tutorSubject}>{subject}</Text>
             </View>
           </View>
         </View>
 
         {/* Session details */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>SESSION DETAILS</Text>
-          <DetailRow label="Date"        value={formatDate(scheduled)} />
-          <View style={styles.rowDivider} />
-          <DetailRow label="Time"        value={formatTime(scheduled)} />
-          <View style={styles.rowDivider} />
-          <DetailRow label="Duration"    value={`${durationHrs} ${durationHrs === 1 ? 'hour' : 'hours'}`} />
-          <View style={styles.rowDivider} />
+          <Text style={styles.sectionLabel}>SESSION DETAILS</Text>
+          <DetailRow label="Date"         value={formatDate(scheduled)} />
+          <View style={styles.divider} />
+          <DetailRow label="Time"         value={formatTime(scheduled)} />
+          <View style={styles.divider} />
+          <DetailRow label="Duration"     value={`${durationHrs} ${durationHrs === 1 ? 'hour' : 'hours'}`} />
+          <View style={styles.divider} />
           <DetailRow label="Session Type" value="Online" />
         </View>
 
         {/* Payment */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>PAYMENT</Text>
-          <DetailRow label="Amount"         value={`Rs. ${Math.round(totalAmount).toLocaleString()}`} />
-          <View style={styles.rowDivider} />
-          <DetailRow label="Method"         value={method.replace('_', ' ').toUpperCase()} />
-          <View style={styles.rowDivider} />
-          <View style={styles.escrowStatusRow}>
+          <Text style={styles.sectionLabel}>PAYMENT</Text>
+          <DetailRow label="Amount" value={`Rs. ${Math.round(totalAmount).toLocaleString()}`} teal />
+          <View style={styles.divider} />
+          <DetailRow label="Method" value={method.replace('_', ' ').toUpperCase()} />
+          <View style={styles.divider} />
+          <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Status</Text>
             <View style={styles.escrowPill}>
-              <Text style={styles.escrowPillText}>🔒 IN ESCROW</Text>
+              <Text style={styles.escrowPillText}>IN ESCROW</Text>
             </View>
           </View>
         </View>
@@ -145,13 +138,13 @@ export default function SessionBookingConfirmScreen() {
         <Pressable
           style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
           onPress={() => router.push({ pathname: '/(tabs)/session-video' as any, params: { sessionId } })}>
-          <Text style={styles.primaryBtnText}>🎥  Join Live Room</Text>
+          <Text style={styles.primaryBtnText}>Join Live Room</Text>
         </Pressable>
 
         <Pressable
           style={({ pressed }) => [styles.outlineBtn, pressed && { opacity: 0.75 }]}
           onPress={() => router.push({ pathname: '/(tabs)/session-chat' as any, params: { sessionId } })}>
-          <Text style={styles.outlineBtnText}>💬  Open Chat</Text>
+          <Text style={styles.outlineBtnText}>Open Chat</Text>
         </Pressable>
 
         {/* Secondary actions */}
@@ -159,12 +152,12 @@ export default function SessionBookingConfirmScreen() {
           <Pressable
             style={({ pressed }) => [styles.secondaryBtn, pressed && { opacity: 0.75 }]}
             onPress={() => router.push({ pathname: '/(tabs)/session-files' as any, params: { sessionId } })}>
-            <Text style={styles.secondaryBtnText}>📁  Files</Text>
+            <Text style={styles.secondaryBtnText}>Files</Text>
           </Pressable>
           <Pressable
             style={({ pressed }) => [styles.secondaryBtn, pressed && { opacity: 0.75 }]}
             onPress={() => router.push({ pathname: '/(tabs)/session-code' as any, params: { sessionId } })}>
-            <Text style={styles.secondaryBtnText}>💻  Code</Text>
+            <Text style={styles.secondaryBtnText}>Code</Text>
           </Pressable>
         </View>
 
@@ -178,106 +171,89 @@ export default function SessionBookingConfirmScreen() {
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value, teal }: { label: string; value: string; teal?: boolean }) {
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
+      <Text style={[styles.detailValue, teal && { color: TEAL, fontSize: 18, fontWeight: '800' }]}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe:        { flex: 1, backgroundColor: '#F5F6FA' },
-  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
-  errorText:   { fontSize: 15, color: '#EF4444', textAlign: 'center' },
-  linkText:    { fontSize: 14, color: Primary, fontWeight: '600' },
+  safe:        { flex: 1, backgroundColor: PAGE },
+  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  // Top bar
-  topbar: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.three, paddingVertical: 12,
-    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E5E7EB',
-    elevation: 2,
+  // Header
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 14,
+    backgroundColor: PAGE, borderBottomWidth: 1, borderBottomColor: '#E4E1D2',
   },
-  backBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    borderWidth: 1.5, borderColor: '#E5E7EB',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  backIcon:     { fontSize: 18, color: '#1A1A2E' },
-  topbarCenter: { flex: 1, alignItems: 'center' },
-  topbarTitle:  { fontSize: 16, fontWeight: '700', color: '#1A1A2E' },
+  backIcon:     { fontSize: 20, color: INK, fontWeight: '600' },
+  headerTitle:  { fontSize: 15, fontWeight: '700', color: INK },
   confirmedPill: {
-    backgroundColor: '#D1FAE5', borderRadius: 20,
+    backgroundColor: '#E1F4EF', borderRadius: 8,
     paddingHorizontal: 10, paddingVertical: 4,
   },
-  confirmedText: { fontSize: 11, color: '#059669', fontWeight: '700' },
+  confirmedText: { fontSize: 10, color: TEAL, fontWeight: '700' },
 
-  scroll: { padding: Spacing.four, gap: Spacing.three },
+  scroll: { padding: 16, gap: 14 },
 
   // Card
   card: {
-    backgroundColor: '#fff', borderRadius: 16,
-    padding: Spacing.three, gap: Spacing.two,
+    backgroundColor: CARD, borderRadius: 12, padding: 14, gap: 10,
     shadowColor: '#000', shadowOpacity: 0.04,
-    shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2,
+    shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
-  cardLabel: {
-    fontSize: 11, fontWeight: '700', color: '#9CA3AF',
-    letterSpacing: 0.8, textTransform: 'uppercase',
+  sectionLabel: {
+    fontSize: 10, fontWeight: '700', color: MUTED,
+    letterSpacing: 1, textTransform: 'uppercase',
   },
 
   // Tutor
-  tutorRow:    { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  avatar:      {
-    width: 52, height: 52, borderRadius: 26,
-    backgroundColor: Primary, alignItems: 'center', justifyContent: 'center',
+  tutorRow:  { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar:    {
+    width: 48, height: 48, borderRadius: 8,
+    backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center',
   },
-  avatarText:  { color: '#fff', fontSize: 18, fontWeight: '800' },
-  tutorInfo:   { flex: 1, gap: 6 },
-  tutorNameRow:{ flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tutorName:   { fontSize: 16, fontWeight: '700', color: '#1A1A2E' },
+  avatarText: { color: '#fff', fontSize: 17, fontWeight: '800' },
+  tutorInfo:  { flex: 1, gap: 4 },
+  nameRow:    { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tutorName:  { fontSize: 15, fontWeight: '700', color: INK },
   verifiedBadge: {
-    backgroundColor: '#E0F7F5', borderRadius: 20,
-    paddingHorizontal: 8, paddingVertical: 2,
+    backgroundColor: '#E1F4EF', borderRadius: 6,
+    paddingHorizontal: 7, paddingVertical: 2,
   },
-  verifiedText: { fontSize: 10, color: Primary, fontWeight: '700' },
-  subjectPill:  {
-    alignSelf: 'flex-start', backgroundColor: '#F3F4F6',
-    borderRadius: 20, paddingHorizontal: 10, paddingVertical: 2,
-  },
-  subjectText:  { fontSize: 11, color: '#374151', fontWeight: '600' },
+  verifiedText:  { fontSize: 9, color: TEAL, fontWeight: '700' },
+  tutorSubject:  { fontSize: 12, color: MUTED },
 
-  // Detail rows
-  detailRow:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  detailLabel:    { fontSize: 13, color: '#6B7280' },
-  detailValue:    { fontSize: 13, fontWeight: '600', color: '#1A1A2E' },
-  rowDivider:     { height: 1, backgroundColor: '#F3F4F6' },
-  escrowStatusRow:{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  escrowPill:     { backgroundColor: '#E0F7F5', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
-  escrowPillText: { fontSize: 11, color: Primary, fontWeight: '700' },
+  divider:     { height: 1, backgroundColor: '#F0EFE5' },
+  detailRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  detailLabel: { fontSize: 12, color: MUTED },
+  detailValue: { fontSize: 12, fontWeight: '600', color: INK },
+  escrowPill:  { backgroundColor: '#E1F4EF', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+  escrowPillText: { fontSize: 10, color: TEAL, fontWeight: '700' },
 
   // Buttons
   primaryBtn: {
-    backgroundColor: Primary, borderRadius: 100,
-    paddingVertical: 16, alignItems: 'center',
-    shadowColor: Primary, shadowOpacity: 0.3,
-    shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4,
+    backgroundColor: TEAL, borderRadius: 10,
+    paddingVertical: 15, alignItems: 'center',
   },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   outlineBtn: {
-    borderWidth: 2, borderColor: Primary, borderRadius: 100,
-    paddingVertical: 14, alignItems: 'center',
+    borderWidth: 1.5, borderColor: TEAL, borderRadius: 10,
+    paddingVertical: 13, alignItems: 'center',
+    backgroundColor: CARD,
   },
-  outlineBtnText: { color: Primary, fontSize: 16, fontWeight: '700' },
-  secondaryRow:   { flexDirection: 'row', gap: Spacing.two },
+  outlineBtnText: { color: TEAL, fontSize: 14, fontWeight: '700' },
+  secondaryRow:   { flexDirection: 'row', gap: 12 },
   secondaryBtn: {
-    flex: 1, borderWidth: 1.5, borderColor: '#E5E7EB',
-    borderRadius: 12, paddingVertical: 14,
-    alignItems: 'center', backgroundColor: '#fff',
+    flex: 1, borderWidth: 1, borderColor: '#E4E1D2',
+    borderRadius: 10, paddingVertical: 13,
+    alignItems: 'center', backgroundColor: CARD,
   },
-  secondaryBtnText: { fontSize: 14, fontWeight: '600', color: '#374151' },
+  secondaryBtnText: { fontSize: 13, fontWeight: '600', color: INK },
   homeBtn:      { alignItems: 'center', paddingVertical: 10 },
-  homeBtnText:  { fontSize: 14, color: '#9CA3AF', fontWeight: '600' },
+  homeBtnText:  { fontSize: 13, color: MUTED, fontWeight: '600' },
 });

@@ -128,7 +128,11 @@ export default function RescheduleSessionScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Back to calendar" onPress={() => router.back()} hitSlop={10}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to My Calendar"
+            onPress={() => router.replace({ pathname: '/(tabs)/bookings' as any, params: { date: formatDateParam(currentSessionDate) } })}
+            hitSlop={10}>
             <Text style={styles.back}>‹</Text>
           </Pressable>
           <Text style={styles.headerTitle}>Reschedule Session</Text>

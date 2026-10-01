@@ -130,11 +130,32 @@ export default function BookingSummaryScreen() {
     }
   };
 
+  const backToSessionDetails = () => {
+    router.replace({
+      pathname: '/(tabs)/session-details' as any,
+      params: {
+        date: params.date,
+        dateLabel,
+        time,
+        duration,
+        meetingType,
+        message,
+        tutorName,
+        tutorSubtitle,
+        rating,
+        reviewCount,
+        hourlyRate,
+        tutorInitials,
+        bookingId: existingBookingId,
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} hitSlop={10}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back to session details" onPress={backToSessionDetails} hitSlop={10}>
             <Text style={styles.back}>‹</Text>
           </Pressable>
           <Text style={styles.headerTitle}>Booking Summary</Text>

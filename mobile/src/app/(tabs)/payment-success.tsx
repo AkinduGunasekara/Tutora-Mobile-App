@@ -8,7 +8,11 @@ import api from '@/lib/api';
 import { Primary, Spacing } from '@/constants/theme';
 
 export default function PaymentSuccessScreen() {
-  const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
+  const { sessionId, tutorName, subject, durationHours, hourlyRate, scheduledDate, paymentMethod } =
+    useLocalSearchParams<{
+      sessionId: string; tutorName?: string; subject?: string;
+      durationHours?: string; hourlyRate?: string; scheduledDate?: string; paymentMethod?: string;
+    }>();
   const [total, setTotal]     = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +78,7 @@ export default function PaymentSuccessScreen() {
           onPress={() =>
             router.replace({
               pathname: '/(tabs)/session-booking-confirm' as any,
-              params:   { sessionId },
+              params:   { sessionId, tutorName, subject, durationHours, hourlyRate, scheduledDate, paymentMethod },
             })
           }>
           <Text style={styles.primaryBtnText}>View Booking Details →</Text>

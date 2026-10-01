@@ -26,24 +26,43 @@ function formatTime(d: string) {
 }
 
 export default function SessionBookingConfirmScreen() {
-  const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
+  const params = useLocalSearchParams<{
+    sessionId: string; tutorName?: string; subject?: string;
+    durationHours?: string; hourlyRate?: string; scheduledDate?: string; paymentMethod?: string;
+  }>();
+  const { sessionId } = params;
+
   const [session, setSession]   = useState<any>(null);
   const [loading, setLoading]   = useState(true);
-  const [error,   setError]     = useState('');
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchSession = async () => {
       try {
         const { data } = await api.get(`/session/${sessionId}`);
         setSession(data);
-      } catch (err: any) {
-        setError(err?.response?.data?.message ?? 'Failed to load session.');
+      } catch {
+        // Use fallback params from navigation if session not in DB (dummy/mock flow)
+        setSession(null);
       } finally {
         setLoading(false);
       }
     };
-    if (sessionId) fetch();
+    if (sessionId) fetchSession();
+    else setLoading(false);
   }, [sessionId]);
+
+  // Build display data — real session takes priority, fallback to route params
+  const tutorName    = session?.tutor?.name      ?? params.tutorName    ?? 'Your Tutor';
+  const subject      = session?.subject          ?? params.subject       ?? 'General';
+  const durationHrs  = session?.durationHours    ?? parseFloat(params.durationHours ?? '1');
+  const totalAmount  = session?.totalAmount      ?? (() => {
+    const rate = parseFloat(params.hourlyRate ?? '0');
+    const hrs  = parseFloat(params.durationHours ?? '1');
+    return rate * hrs * 1.05;
+  })();
+  const method       = session?.paymentMethod    ?? params.paymentMethod ?? 'card';
+  const scheduled    = session?.scheduledDate    ?? params.scheduledDate ?? new Date().toISOString();
+  const isVerified   = session?.tutor?.isVerified ?? false;
 
   if (loading) return (
     <SafeAreaView style={styles.safe}>
@@ -52,19 +71,6 @@ export default function SessionBookingConfirmScreen() {
       </View>
     </SafeAreaView>
   );
-
-  if (error || !session) return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.loadingWrap}>
-        <Text style={styles.errorText}>{error || 'Session not found.'}</Text>
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.linkText}>← Go back</Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
-  );
-
-  const tutor = session.tutor ?? {};
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -90,19 +96,19 @@ export default function SessionBookingConfirmScreen() {
           <Text style={styles.cardLabel}>YOUR TUTOR</Text>
           <View style={styles.tutorRow}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{getInitials(tutor.name)}</Text>
+              <Text style={styles.avatarText}>{getInitials(tutorName)}</Text>
             </View>
             <View style={styles.tutorInfo}>
               <View style={styles.tutorNameRow}>
-                <Text style={styles.tutorName}>{tutor.name ?? '—'}</Text>
-                {tutor.isVerified && (
+                <Text style={styles.tutorName}>{tutorName}</Text>
+                {isVerified && (
                   <View style={styles.verifiedBadge}>
                     <Text style={styles.verifiedText}>✓ Verified</Text>
                   </View>
                 )}
               </View>
               <View style={styles.subjectPill}>
-                <Text style={styles.subjectText}>{session.subject}</Text>
+                <Text style={styles.subjectText}>{subject}</Text>
               </View>
             </View>
           </View>
@@ -111,11 +117,11 @@ export default function SessionBookingConfirmScreen() {
         {/* Session details */}
         <View style={styles.card}>
           <Text style={styles.cardLabel}>SESSION DETAILS</Text>
-          <DetailRow label="Date"        value={formatDate(session.scheduledDate)} />
+          <DetailRow label="Date"        value={formatDate(scheduled)} />
           <View style={styles.rowDivider} />
-          <DetailRow label="Time"        value={formatTime(session.scheduledDate)} />
+          <DetailRow label="Time"        value={formatTime(scheduled)} />
           <View style={styles.rowDivider} />
-          <DetailRow label="Duration"    value={`${session.durationHours} ${session.durationHours === 1 ? 'hour' : 'hours'}`} />
+          <DetailRow label="Duration"    value={`${durationHrs} ${durationHrs === 1 ? 'hour' : 'hours'}`} />
           <View style={styles.rowDivider} />
           <DetailRow label="Session Type" value="Online" />
         </View>
@@ -123,9 +129,9 @@ export default function SessionBookingConfirmScreen() {
         {/* Payment */}
         <View style={styles.card}>
           <Text style={styles.cardLabel}>PAYMENT</Text>
-          <DetailRow label="Amount"         value={`Rs. ${session.totalAmount?.toLocaleString()}`} />
+          <DetailRow label="Amount"         value={`Rs. ${Math.round(totalAmount).toLocaleString()}`} />
           <View style={styles.rowDivider} />
-          <DetailRow label="Method"         value={session.paymentMethod?.replace('_', ' ').toUpperCase()} />
+          <DetailRow label="Method"         value={method.replace('_', ' ').toUpperCase()} />
           <View style={styles.rowDivider} />
           <View style={styles.escrowStatusRow}>
             <Text style={styles.detailLabel}>Status</Text>

@@ -83,6 +83,17 @@ exports.getMe = async (req, res) => {
   }
 };
 
+exports.getTutors = async (req, res) => {
+  try {
+    const tutors = await User.find({ role: 'tutor' })
+      .select('name bio subjects hourlyRate isVerified avatar')
+      .lean();
+    res.json(tutors);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 exports.updateProfile = async (req, res) => {
   try {
     const allowed = [

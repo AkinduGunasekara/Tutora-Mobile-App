@@ -17,7 +17,9 @@ exports.listBookings = async (req, res) => {
         { student: req.user._id },
         { 'tutor.userId': req.user._id },
       ],
-    }).sort({ sessionDate: 1, createdAt: -1 });
+    })
+      .populate('student', 'name email')
+      .sort({ sessionDate: 1, createdAt: -1 });
 
     return res.json({ bookings });
   } catch (err) {
@@ -91,7 +93,7 @@ exports.createBooking = async (req, res) => {
       meetingType,
       message: message.trim(),
       fees: { session: sessionFee, platform: 0, total: sessionFee },
-      status: 'confirmed',
+      status: 'pending',
     });
 
     return res.status(201).json({
@@ -122,8 +124,8 @@ exports.cancelBooking = async (req, res) => {
     }
     const booking = await Booking.findOne({ _id: req.params.id, student: req.user._id });
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
-    if (booking.status !== 'confirmed') {
-      return res.status(400).json({ message: 'Only confirmed bookings can be cancelled' });
+    if (!['pending', 'confirmed'].includes(booking.status)) {
+      return res.status(400).json({ message: 'Only pending or confirmed bookings can be cancelled' });
     }
 
     booking.status = 'cancelled';
@@ -175,5 +177,48 @@ exports.rescheduleBooking = async (req, res) => {
     return res.json({ message: 'Booking rescheduled', booking });
   } catch (err) {
     return res.status(500).json({ message: 'Could not reschedule booking', error: err.message });
+  }
+};
+
+exports.acceptBooking = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Booking ID is invalid' });
+    }
+    const booking = await Booking.findById(req.params.id).populate('student', 'name email');
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    if (String(booking.tutor.userId) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'Not your booking to accept' });
+    }
+    if (booking.status !== 'pending') {
+      return res.status(400).json({ message: 'Booking is not pending' });
+    }
+    booking.status = 'confirmed';
+    await booking.save();
+    return res.json({ message: 'Booking accepted', booking });
+  } catch (err) {
+    return res.status(500).json({ message: 'Could not accept booking', error: err.message });
+  }
+};
+
+exports.rejectBooking = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Booking ID is invalid' });
+    }
+    const booking = await Booking.findById(req.params.id).populate('student', 'name email');
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    if (String(booking.tutor.userId) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'Not your booking to reject' });
+    }
+    if (booking.status !== 'pending') {
+      return res.status(400).json({ message: 'Booking is not pending' });
+    }
+    booking.status = 'cancelled';
+    booking.cancellationReason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 500) : 'Rejected by tutor';
+    await booking.save();
+    return res.json({ message: 'Booking rejected', booking });
+  } catch (err) {
+    return res.status(500).json({ message: 'Could not reject booking', error: err.message });
   }
 };

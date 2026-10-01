@@ -21,6 +21,19 @@ const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const monthTitle = (date: Date) =>
   date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
+const parseDateParam = (value?: string | string[]) => {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+  const [year, month, day] = raw.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const durationFromMinutes = (value?: string | string[]) => {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const labels: Record<string, string> = { '30': '30 min', '60': '1 HR', '90': '1.5 Hr', '120': '2 Hr' };
+  return raw ? labels[raw] : undefined;
+};
+
 export default function ScheduleScreen() {
   const tutorParams = useLocalSearchParams<{
     tutorName?: string;
@@ -29,11 +42,20 @@ export default function ScheduleScreen() {
     reviewCount?: string;
     hourlyRate?: string;
     tutorInitials?: string;
+    bookingId?: string;
+    date?: string;
+    durationMinutes?: string;
+    time?: string;
+    meetingType?: string;
+    message?: string;
   }>();
-  const [month, setMonth] = useState(new Date(2026, 9, 1));
-  const [selectedDate, setSelectedDate] = useState(new Date(2026, 9, 14));
-  const [duration, setDuration] = useState('1 HR');
-  const [time, setTime] = useState('10:00 AM');
+  const [month, setMonth] = useState(() => {
+    const initial = parseDateParam(tutorParams.date) ?? new Date(2026, 9, 1);
+    return new Date(initial.getFullYear(), initial.getMonth(), 1);
+  });
+  const [selectedDate, setSelectedDate] = useState(() => parseDateParam(tutorParams.date) ?? new Date(2026, 9, 14));
+  const [duration, setDuration] = useState(() => durationFromMinutes(tutorParams.durationMinutes) ?? '1 HR');
+  const [time, setTime] = useState(tutorParams.time ?? '10:00 AM');
   const [showSummary, setShowSummary] = useState(false);
 
   const days = useMemo(() => {
@@ -79,6 +101,9 @@ export default function ScheduleScreen() {
         reviewCount: tutorParams.reviewCount,
         hourlyRate: tutorParams.hourlyRate,
         tutorInitials: tutorParams.tutorInitials,
+        bookingId: tutorParams.bookingId,
+        meetingType: tutorParams.meetingType,
+        message: tutorParams.message,
       },
     });
   };

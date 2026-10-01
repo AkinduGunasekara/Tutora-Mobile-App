@@ -43,7 +43,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="bookings"
         options={{
-          title: 'Bookings',
+          title: 'Calendar',
           tabBarIcon: ({ focused }) => <TabIcon emoji="📅" focused={focused} />,
         }}
       />

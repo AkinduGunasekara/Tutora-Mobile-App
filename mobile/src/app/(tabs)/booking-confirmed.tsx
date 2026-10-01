@@ -36,15 +36,18 @@ const getEndTime = (startTime: string, durationHours: number) => {
 export default function BookingConfirmedScreen() {
   const params = useLocalSearchParams<{
     bookingId?: string;
+    date?: string;
     dateLabel?: string;
     time?: string;
     duration?: string;
     meetingType?: string;
     tutorName?: string;
+    wasRescheduled?: string;
   }>();
   const [showPaymentNote, setShowPaymentNote] = useState(false);
 
   const bookingId = asText(params.bookingId, '');
+  const wasRescheduled = asText(params.wasRescheduled, 'false') === 'true';
   const dateLabel = asText(params.dateLabel, 'Wed, Oct 14, 2026');
   const time = asText(params.time, '10:00 AM');
   const duration = asText(params.duration, '1 HR');
@@ -65,9 +68,9 @@ export default function BookingConfirmedScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
             <View style={styles.checkCircle}><Text style={styles.check}>✓</Text></View>
-            <Text style={styles.title}>Booking Confirmed!</Text>
+            <Text style={styles.title}>{wasRescheduled ? 'Session Rescheduled!' : 'Booking Confirmed!'}</Text>
             <Text style={styles.bookingId}>Booking ID: {displayId}</Text>
-            <Text style={styles.subtitle}>Your booking details have been saved.</Text>
+            <Text style={styles.subtitle}>{wasRescheduled ? 'Your updated session details have been saved.' : 'Your booking details have been saved.'}</Text>
           </View>
 
           <View style={styles.detailsCard}>
@@ -86,7 +89,7 @@ export default function BookingConfirmedScreen() {
           <View style={styles.actions}>
             <Pressable
               accessibilityRole="button"
-              onPress={() => router.replace('/(tabs)/bookings')}
+              onPress={() => router.push({ pathname: '/(tabs)/bookings', params: { date: asText(params.date, '') } })}
               style={({ pressed }) => [styles.calendarButton, pressed && styles.pressed]}>
               <Text style={styles.primaryButtonText}>View My Calendar</Text>
             </Pressable>

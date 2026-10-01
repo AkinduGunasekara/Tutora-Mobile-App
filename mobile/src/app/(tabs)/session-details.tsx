@@ -21,6 +21,12 @@ type MeetingType = (typeof MEETING_TYPES)[number];
 const asText = (value: string | string[] | undefined, fallback: string) =>
   Array.isArray(value) ? value[0] ?? fallback : value ?? fallback;
 
+const durationToMinutes = (duration: string) => {
+  if (duration.toLowerCase().includes('30')) return 30;
+  const hours = Number.parseFloat(duration);
+  return Number.isFinite(hours) ? Math.round(hours * 60) : 60;
+};
+
 export default function SessionDetailsScreen() {
   const params = useLocalSearchParams<{
     date?: string;
@@ -33,9 +39,17 @@ export default function SessionDetailsScreen() {
     reviewCount?: string;
     hourlyRate?: string;
     tutorInitials?: string;
+    bookingId?: string;
+    meetingType?: string;
+    message?: string;
   }>();
-  const [meetingType, setMeetingType] = useState<MeetingType>('Microsoft Teams');
-  const [message, setMessage] = useState('');
+  const initialMeetingType = asText(params.meetingType, 'Microsoft Teams');
+  const [meetingType, setMeetingType] = useState<MeetingType>(
+    MEETING_TYPES.includes(initialMeetingType as MeetingType)
+      ? initialMeetingType as MeetingType
+      : 'Microsoft Teams',
+  );
+  const [message, setMessage] = useState(asText(params.message, ''));
 
   const dateLabel = asText(params.dateLabel, 'Wed, Oct 14, 2026');
   const time = asText(params.time, '10:00 AM');
@@ -63,6 +77,28 @@ export default function SessionDetailsScreen() {
         reviewCount,
         hourlyRate,
         tutorInitials,
+        bookingId: params.bookingId,
+      },
+    });
+  };
+
+  const backToSchedule = () => {
+    router.replace({
+      pathname: '/(tabs)/schedule' as any,
+      params: {
+        bookingId: params.bookingId,
+        date: params.date,
+        time,
+        duration,
+        durationMinutes: String(durationToMinutes(duration)),
+        meetingType,
+        message,
+        tutorName,
+        tutorSubtitle,
+        rating,
+        reviewCount,
+        hourlyRate,
+        tutorInitials,
       },
     });
   };
@@ -71,7 +107,7 @@ export default function SessionDetailsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} hitSlop={10}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back to date and time" onPress={backToSchedule} hitSlop={10}>
             <Text style={styles.back}>‹</Text>
           </Pressable>
           <Text style={styles.headerTitle}>Session Details</Text>

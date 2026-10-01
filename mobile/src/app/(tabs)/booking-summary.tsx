@@ -52,6 +52,7 @@ export default function BookingSummaryScreen() {
     reviewCount?: string;
     hourlyRate?: string;
     tutorInitials?: string;
+    bookingId?: string;
   }>();
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -68,6 +69,7 @@ export default function BookingSummaryScreen() {
   const reviewCount = asText(params.reviewCount, '124');
   const hourlyRate = asText(params.hourlyRate, 'Rs 1,000/Hr');
   const tutorInitials = asText(params.tutorInitials, 'AG');
+  const existingBookingId = asText(params.bookingId, '');
 
   const hourlyAmount = Number(hourlyRate.replace(/[^\d.]/g, '')) || 1000;
   const sessionFee = Math.round(hourlyAmount * getDurationHours(duration));
@@ -86,32 +88,39 @@ export default function BookingSummaryScreen() {
     setErrorMessage('');
 
     try {
-      const { data } = await api.post('/bookings', {
+      const bookingPayload = {
         date: asText(params.date, ''),
         time,
         durationMinutes: Math.round(durationHours * 60),
         meetingType,
         message,
-        tutor: {
-          name: tutorName,
-          subtitle: tutorSubtitle,
-          initials: tutorInitials,
-          rating: Number(rating),
-          reviewCount: Number(reviewCount),
-          hourlyRate: hourlyAmount,
-        },
-      });
-      const savedId = String(data.booking.id);
+      };
+      const { data } = existingBookingId
+        ? await api.patch(`/bookings/${existingBookingId}/reschedule`, bookingPayload)
+        : await api.post('/bookings', {
+          ...bookingPayload,
+          tutor: {
+            name: tutorName,
+            subtitle: tutorSubtitle,
+            initials: tutorInitials,
+            rating: Number(rating),
+            reviewCount: Number(reviewCount),
+            hourlyRate: hourlyAmount,
+          },
+        });
+      const savedId = String(data.booking?.id ?? data.booking?._id ?? existingBookingId);
       setBookingId(savedId);
-      router.replace({
+      router.push({
         pathname: '/(tabs)/booking-confirmed' as any,
         params: {
           bookingId: savedId,
+          date: asText(params.date, ''),
           dateLabel,
           time,
           duration,
           meetingType,
           tutorName,
+          wasRescheduled: existingBookingId ? 'true' : 'false',
         },
       });
     } catch (error: any) {
@@ -179,7 +188,7 @@ export default function BookingSummaryScreen() {
             style={({ pressed }) => [styles.confirmButton, pressed && styles.pressed, (submitting || bookingId) && styles.confirmButtonDisabled]}>
             {submitting
               ? <ActivityIndicator color="#FFFFFF" />
-              : <Text style={styles.confirmText}>{bookingId ? 'Booking Request Sent' : 'Confirm Booking'}</Text>}
+              : <Text style={styles.confirmText}>{bookingId ? 'Booking Request Sent' : existingBookingId ? 'Confirm Reschedule' : 'Confirm Booking'}</Text>}
           </Pressable>
           {errorMessage ? <Text accessibilityLiveRegion="polite" style={styles.errorText}>{errorMessage}</Text> : null}
           {bookingId ? (

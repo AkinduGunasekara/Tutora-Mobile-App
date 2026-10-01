@@ -26,6 +26,7 @@ type Booking = {
   meetingType: string;
   message: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  fees?: { session?: number; total?: number };
   tutor: {
     userId?: string | null;
     name: string;
@@ -70,9 +71,6 @@ export default function BookingsScreen() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
-  const [actionError, setActionError] = useState('');
-  const [workingId, setWorkingId] = useState<string | null>(null);
 
   const loadBookings = useCallback(async () => {
     setLoading(true);
@@ -124,22 +122,6 @@ export default function BookingsScreen() {
       next.setDate(Math.min(current.getDate(), maxDay));
       return next;
     });
-  };
-
-  const cancelBooking = async (id: string) => {
-    setWorkingId(id);
-    setActionError('');
-    try {
-      await api.patch(`/bookings/${id}/cancel`);
-      setBookings((current) => current.map((booking) =>
-        booking._id === id ? { ...booking, status: 'cancelled' } : booking,
-      ));
-      setPendingCancelId(null);
-    } catch (error: any) {
-      setActionError(error?.response?.data?.message ?? 'Could not cancel this booking. Please try again.');
-    } finally {
-      setWorkingId(null);
-    }
   };
 
   const startReschedule = (booking: Booking) => {
@@ -235,7 +217,20 @@ export default function BookingsScreen() {
                     </Pressable>
                     <Pressable
                       accessibilityRole="button"
-                      onPress={() => { setActionError(''); setPendingCancelId(booking._id); }}
+                      onPress={() => router.push({
+                        pathname: '/(tabs)/cancel-session' as any,
+                        params: {
+                          bookingId: booking._id,
+                          date: dateParam(fromStoredDate(booking.sessionDate)),
+                          time: booking.startTime,
+                          durationMinutes: String(booking.durationMinutes),
+                          meetingType: booking.meetingType,
+                          tutorName: booking.tutor.name,
+                          tutorSubtitle: booking.tutor.subtitle,
+                          sessionTitle: 'Software Engineering Tutoring',
+                          refund: String(booking.fees?.session ?? booking.fees?.total ?? 0),
+                        },
+                      })}
                       style={styles.cancelButton}>
                       <Text style={styles.cancelText}>Cancel</Text>
                     </Pressable>
@@ -246,18 +241,6 @@ export default function BookingsScreen() {
                   <Text style={styles.timeMeta}>◷ {booking.startTime} - {getEndTime(booking.startTime, booking.durationMinutes)}</Text>
                   <Text style={styles.meetingMeta}>{booking.meetingType === 'Microsoft Teams' ? '▣ Teams Meeting' : '⌂ In-Person'}</Text>
                 </View>
-                {pendingCancelId === booking._id && (
-                  <View style={styles.cancelConfirm}>
-                    <Text style={styles.cancelPrompt}>Cancel this booking?</Text>
-                    <Pressable disabled={workingId === booking._id} onPress={() => cancelBooking(booking._id)} style={styles.confirmCancelButton}>
-                      <Text style={styles.confirmCancelText}>{workingId === booking._id ? 'Cancelling…' : 'Yes, cancel'}</Text>
-                    </Pressable>
-                    <Pressable onPress={() => setPendingCancelId(null)} style={styles.keepButton}>
-                      <Text style={styles.keepText}>Keep</Text>
-                    </Pressable>
-                  </View>
-                )}
-                {actionError ? <Text accessibilityLiveRegion="polite" style={styles.errorText}>{actionError}</Text> : null}
               </View>
             ))
           )}
@@ -313,10 +296,4 @@ const styles = StyleSheet.create({
   sessionMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 6 },
   timeMeta: { color: MUTED, fontSize: 9, flex: 1 },
   meetingMeta: { color: TEAL, fontSize: 9, fontWeight: '700' },
-  cancelConfirm: { backgroundColor: '#FFF8E8', borderRadius: 8, padding: 8, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  cancelPrompt: { color: INK, fontSize: 9, flex: 1 },
-  confirmCancelButton: { backgroundColor: '#B42318', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 5 },
-  confirmCancelText: { color: '#FFFFFF', fontSize: 8, fontWeight: '700' },
-  keepButton: { padding: 4 },
-  keepText: { color: TEAL, fontSize: 8, fontWeight: '700' },
 });

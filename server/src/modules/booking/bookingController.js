@@ -127,6 +127,7 @@ exports.cancelBooking = async (req, res) => {
     }
 
     booking.status = 'cancelled';
+    booking.cancellationReason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 500) : '';
     await booking.save();
     return res.json({ message: 'Booking cancelled', booking });
   } catch (err) {

@@ -27,6 +27,7 @@ const bookingSchema = new mongoose.Schema(
     },
     message: { type: String, default: '', maxlength: 500, trim: true },
     rescheduleReason: { type: String, default: '', maxlength: 500, trim: true },
+    cancellationReason: { type: String, default: '', maxlength: 500, trim: true },
     fees: {
       session: { type: Number, required: true, min: 0 },
       platform: { type: Number, required: true, default: 0, min: 0 },

@@ -43,7 +43,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="bookings"
         options={{
-          title: 'Bookings',
+          title: 'Calendar',
           tabBarIcon: ({ focused }) => <TabIcon emoji="📅" focused={focused} />,
         }}
       />
@@ -65,6 +65,22 @@ export default function TabsLayout() {
       <Tabs.Screen name="explore" options={{ href: null }} />
       {/* Hide edit-profile from tab bar */}
       <Tabs.Screen name="edit-profile" options={{ href: null }} />
+      {/* Schedule is opened from tutor selection, not from the tab bar. */}
+      <Tabs.Screen name="schedule" options={{ href: null }} />
+      {/* Session details follow schedule selection and stay off the tab bar. */}
+      <Tabs.Screen name="session-details" options={{ href: null }} />
+      {/* Booking summary follows the session details step. */}
+      <Tabs.Screen name="booking-summary" options={{ href: null }} />
+      {/* Confirmation follows a successful booking save. */}
+      <Tabs.Screen name="booking-confirmed" options={{ href: null }} />
+      {/* Rescheduling edits an existing booking. */}
+      <Tabs.Screen name="reschedule-session" options={{ href: null }} />
+      {/* Cancellation review for a scheduled booking. */}
+      <Tabs.Screen name="cancel-session" options={{ href: null }} />
+      {/* Cancellation result screen shown after the API confirms cancellation. */}
+      <Tabs.Screen name="session-cancelled" options={{ href: null }} />
+      {/* Reschedule confirmation is shown before saving the change. */}
+      <Tabs.Screen name="reschedule-confirmation" options={{ href: null }} />
     </Tabs>
   );
 }

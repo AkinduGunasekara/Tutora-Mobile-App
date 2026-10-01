@@ -5,7 +5,11 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
-import { Primary, Spacing } from '@/constants/theme';
+
+const PAGE  = '#EFEDDC';
+const INK   = '#171943';
+const TEAL  = '#008C91';
+const MUTED = '#78809A';
 
 export default function PaymentSuccessScreen() {
   const { sessionId, tutorName, subject, durationHours, hourlyRate, scheduledDate, paymentMethod } =
@@ -16,7 +20,6 @@ export default function PaymentSuccessScreen() {
   const [total, setTotal]     = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Animated check circle
   const scale   = useSharedValue(0);
   const opacity = useSharedValue(0);
 
@@ -29,7 +32,7 @@ export default function PaymentSuccessScreen() {
         const { data } = await api.get(`/session/${sessionId}`);
         setTotal(data.totalAmount);
       } catch {
-        // Non-critical — amount display is optional
+        // Non-critical
       } finally {
         setLoading(false);
       }
@@ -52,10 +55,10 @@ export default function PaymentSuccessScreen() {
           <Text style={styles.checkMark}>✓</Text>
         </Animated.View>
 
-        <Text style={styles.title}>Payment Successful!</Text>
+        <Text style={styles.title}>Payment Successful</Text>
 
         {loading ? (
-          <ActivityIndicator color={Primary} />
+          <ActivityIndicator color={TEAL} />
         ) : total !== null ? (
           <Text style={styles.amount}>Rs. {total.toLocaleString()}</Text>
         ) : null}
@@ -64,15 +67,11 @@ export default function PaymentSuccessScreen() {
           Your payment is safely held in escrow and will be released to your tutor upon session completion.
         </Text>
 
-        {/* Escrow info box */}
+        {/* Escrow note */}
         <View style={styles.escrowBox}>
-          <Text style={styles.escrowIcon}>🔒</Text>
-          <Text style={styles.escrowText}>
-            Escrow Active — Funds released after session ends
-          </Text>
+          <Text style={styles.escrowText}>Escrow Active — Funds released after session ends</Text>
         </View>
 
-        {/* Actions */}
         <Pressable
           style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
           onPress={() =>
@@ -81,12 +80,10 @@ export default function PaymentSuccessScreen() {
               params:   { sessionId, tutorName, subject, durationHours, hourlyRate, scheduledDate, paymentMethod },
             })
           }>
-          <Text style={styles.primaryBtnText}>View Booking Details →</Text>
+          <Text style={styles.primaryBtnText}>View Booking Details</Text>
         </Pressable>
 
-        <Pressable
-          style={styles.ghostBtn}
-          onPress={() => router.replace('/(tabs)/home' as any)}>
+        <Pressable style={styles.ghostBtn} onPress={() => router.replace('/(tabs)/home' as any)}>
           <Text style={styles.ghostBtnText}>Back to Home</Text>
         </Pressable>
 
@@ -96,45 +93,41 @@ export default function PaymentSuccessScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: '#fff' },
+  safe:   { flex: 1, backgroundColor: PAGE },
   center: {
     flex: 1, alignItems: 'center', justifyContent: 'center',
-    padding: Spacing.four, gap: Spacing.three,
+    padding: 24, gap: 16,
   },
 
   successCircle: {
-    width: 100, height: 100, borderRadius: 50,
+    width: 80, height: 80, borderRadius: 10,
     backgroundColor: '#22C55E',
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#22C55E', shadowOpacity: 0.35,
-    shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
-    elevation: 8, marginBottom: 8,
+    shadowColor: '#22C55E', shadowOpacity: 0.3,
+    shadowRadius: 14, shadowOffset: { width: 0, height: 5 },
+    elevation: 6, marginBottom: 8,
   },
-  checkMark: { fontSize: 44, color: '#fff', fontWeight: '900' },
+  checkMark: { fontSize: 38, color: '#fff', fontWeight: '900' },
 
-  title:  { fontSize: 26, fontWeight: '800', color: '#1A1A2E', textAlign: 'center' },
-  amount: { fontSize: 32, fontWeight: '900', color: Primary },
+  title:  { fontSize: 22, fontWeight: '800', color: INK, textAlign: 'center' },
+  amount: { fontSize: 30, fontWeight: '900', color: TEAL },
   sub: {
-    fontSize: 14, color: '#6B7280', textAlign: 'center', lineHeight: 22, maxWidth: 300,
+    fontSize: 13, color: MUTED, textAlign: 'center', lineHeight: 20, maxWidth: 300,
   },
 
   escrowBox: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#E0F7F5', borderRadius: 12,
-    paddingVertical: 12, paddingHorizontal: Spacing.three,
-    alignSelf: 'stretch',
+    backgroundColor: '#E1F4EF', borderRadius: 10,
+    paddingVertical: 12, paddingHorizontal: 16, alignSelf: 'stretch',
+    alignItems: 'center',
   },
-  escrowIcon: { fontSize: 18 },
-  escrowText: { flex: 1, fontSize: 13, color: Primary, fontWeight: '600' },
+  escrowText: { fontSize: 12, color: TEAL, fontWeight: '600', textAlign: 'center' },
 
   primaryBtn: {
-    backgroundColor: Primary, borderRadius: 100,
-    paddingVertical: 16, alignItems: 'center', alignSelf: 'stretch',
-    shadowColor: Primary, shadowOpacity: 0.3,
-    shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4,
+    backgroundColor: TEAL, borderRadius: 10,
+    paddingVertical: 15, alignItems: 'center', alignSelf: 'stretch',
   },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
+  primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 
   ghostBtn:     { paddingVertical: 12, alignItems: 'center' },
-  ghostBtnText: { fontSize: 14, color: '#9CA3AF', fontWeight: '600' },
+  ghostBtnText: { fontSize: 13, color: MUTED, fontWeight: '600' },
 });

@@ -9,7 +9,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { Primary } from '@/constants/theme';
+
+const PAGE  = '#EFEDDC';
+const INK   = '#171943';
+const TEAL  = '#008C91';
+const MUTED = '#78809A';
 
 const STEPS = [
   'Verifying payment details',
@@ -26,9 +30,9 @@ export default function PaymentProcessingScreen() {
 
   const { token } = useAuth();
 
-  const [step, setStep]       = useState(0);
-  const [error, setError]     = useState('');
-  const sessionIdRef           = useRef<string>('');
+  const [step, setStep]   = useState(0);
+  const [error, setError] = useState('');
+  const sessionIdRef       = useRef<string>('');
 
   // Pulsing ring
   const scale   = useSharedValue(1);
@@ -45,20 +49,16 @@ export default function PaymentProcessingScreen() {
       setError('You are not logged in. Please log in and try again.');
       return;
     }
-    // Pulse animation
-    scale.value   = withRepeat(withTiming(1.18, { duration: 900 }), -1, true);
-    opacity.value = withRepeat(withTiming(0.6, { duration: 900 }), -1, true);
+    scale.value   = withRepeat(withTiming(1.2, { duration: 900 }), -1, true);
+    opacity.value = withRepeat(withTiming(0.4, { duration: 900 }), -1, true);
 
-    // Sequential step reveals
     step0Op.value = withDelay(400,  withTiming(1, { duration: 400 }));
     step1Op.value = withDelay(1200, withTiming(1, { duration: 400 }));
     step2Op.value = withDelay(2000, withTiming(1, { duration: 400 }));
 
-    // Step counter for UI
     const t1 = setTimeout(() => setStep(1), 1200);
     const t2 = setTimeout(() => setStep(2), 2000);
 
-    // API flow — always succeeds (falls back to mock session if backend unavailable)
     const run = async () => {
       let resolvedSessionId = `mock-${Date.now()}`;
       try {
@@ -75,7 +75,6 @@ export default function PaymentProcessingScreen() {
         sessionIdRef.current = resolvedSessionId;
         await api.patch(`/session/${resolvedSessionId}/confirm-payment`).catch(() => {});
       } catch {
-        // Backend unavailable — use mock session ID, UI flow continues
         sessionIdRef.current = resolvedSessionId;
       }
 
@@ -108,10 +107,9 @@ export default function PaymentProcessingScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.center}>
-          <Text style={styles.errorEmoji}>⚠️</Text>
           <Text style={styles.errorTitle}>Payment Failed</Text>
           <Text style={styles.errorMsg}>{error}</Text>
-          <Text style={styles.goBack} onPress={() => router.back()}>← Go back</Text>
+          <Text style={styles.goBack} onPress={() => router.back()}>Go back</Text>
         </View>
       </SafeAreaView>
     );
@@ -121,15 +119,15 @@ export default function PaymentProcessingScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.center}>
 
-        {/* Animated circle */}
+        {/* Animated ring */}
         <View style={styles.circleWrap}>
           <Animated.View style={[styles.pulseRing, pulseStyle]} />
           <View style={styles.circle}>
-            <Text style={styles.circleEmoji}>💳</Text>
+            <Text style={styles.circleLabel}>PAY</Text>
           </View>
         </View>
 
-        <Text style={styles.title}>Processing Payment...</Text>
+        <Text style={styles.title}>Processing Payment</Text>
         <Text style={styles.sub}>Please do not close the app</Text>
 
         {/* Steps */}
@@ -150,7 +148,7 @@ export default function PaymentProcessingScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: '#fff' },
+  safe:   { flex: 1, backgroundColor: PAGE },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
 
   // Circle
@@ -158,35 +156,34 @@ const styles = StyleSheet.create({
   pulseRing: {
     position: 'absolute',
     width: 120, height: 120, borderRadius: 60,
-    backgroundColor: Primary,
+    backgroundColor: TEAL,
   },
   circle: {
-    width: 90, height: 90, borderRadius: 45,
-    backgroundColor: Primary,
+    width: 90, height: 90, borderRadius: 10,
+    backgroundColor: TEAL,
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: Primary, shadowOpacity: 0.4, shadowRadius: 16,
+    shadowColor: TEAL, shadowOpacity: 0.35, shadowRadius: 16,
     shadowOffset: { width: 0, height: 6 }, elevation: 8,
   },
-  circleEmoji: { fontSize: 36 },
+  circleLabel: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 2 },
 
-  title: { fontSize: 22, fontWeight: '800', color: '#1A1A2E', textAlign: 'center' },
-  sub:   { fontSize: 14, color: '#9CA3AF', textAlign: 'center' },
+  title: { fontSize: 20, fontWeight: '800', color: INK, textAlign: 'center' },
+  sub:   { fontSize: 13, color: MUTED, textAlign: 'center' },
 
   // Steps
   stepsWrap: { marginTop: 24, gap: 14, alignSelf: 'stretch' },
   stepRow:   { flexDirection: 'row', alignItems: 'center', gap: 12 },
   checkCircle: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center',
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: '#D8D5C5', alignItems: 'center', justifyContent: 'center',
   },
-  checkCircleActive: { backgroundColor: Primary },
-  checkText:         { fontSize: 12, color: '#fff', fontWeight: '800' },
-  stepText:          { fontSize: 14, color: '#9CA3AF' },
-  stepTextActive:    { color: '#1A1A2E', fontWeight: '600' },
+  checkCircleActive: { backgroundColor: TEAL },
+  checkText:         { fontSize: 11, color: '#fff', fontWeight: '800' },
+  stepText:          { fontSize: 13, color: MUTED },
+  stepTextActive:    { color: INK, fontWeight: '600' },
 
   // Error
-  errorEmoji: { fontSize: 48, marginBottom: 8 },
-  errorTitle: { fontSize: 20, fontWeight: '800', color: '#EF4444' },
-  errorMsg:   { fontSize: 14, color: '#6B7280', textAlign: 'center' },
-  goBack:     { fontSize: 14, color: Primary, fontWeight: '600', marginTop: 8 },
+  errorTitle: { fontSize: 18, fontWeight: '800', color: '#B42318' },
+  errorMsg:   { fontSize: 13, color: MUTED, textAlign: 'center' },
+  goBack:     { fontSize: 13, color: TEAL, fontWeight: '700', marginTop: 8 },
 });

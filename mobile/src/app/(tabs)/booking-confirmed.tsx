@@ -42,6 +42,9 @@ export default function BookingConfirmedScreen() {
     meetingType?: string;
     tutorName?: string;
     wasRescheduled?: string;
+    tutorId?: string;
+    subject?: string;
+    hourlyRate?: string;
   }>();
   const bookingId = asText(params.bookingId, '');
   const wasRescheduled = asText(params.wasRescheduled, 'false') === 'true';
@@ -50,6 +53,9 @@ export default function BookingConfirmedScreen() {
   const duration = asText(params.duration, '1 HR');
   const meetingType = asText(params.meetingType, 'Microsoft Teams');
   const tutorName = asText(params.tutorName, 'Anjana Gayantha');
+  const tutorId = asText(params.tutorId, '');
+  const subject = asText(params.subject, 'General');
+  const hourlyRate = asText(params.hourlyRate, '0');
   const durationHours = getDurationHours(duration);
   const durationLabel = durationHours === 1
     ? '1 Hour'
@@ -92,7 +98,24 @@ export default function BookingConfirmedScreen() {
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              onPress={() => router.replace('/(tabs)/home' as any)}
+              onPress={() => {
+                if (wasRescheduled) {
+                  router.replace('/(tabs)/home' as any);
+                } else {
+                  router.push({
+                    pathname: '/(tabs)/payment-summary' as any,
+                    params: {
+                      bookingId,
+                      tutorId,
+                      tutorName,
+                      subject,
+                      durationHours: String(durationHours),
+                      hourlyRate,
+                      scheduledDate: asText(params.date, new Date().toISOString()),
+                    },
+                  });
+                }
+              }}
               style={({ pressed }) => [wasRescheduled ? styles.homeButton : styles.paymentButton, pressed && styles.pressed]}>
               <Text style={wasRescheduled ? styles.homeButtonText : styles.paymentButtonText}>{wasRescheduled ? 'Back to Home' : 'Secure Payment'}</Text>
             </Pressable>

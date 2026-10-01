@@ -86,7 +86,7 @@ exports.getMe = async (req, res) => {
 exports.getTutors = async (req, res) => {
   try {
     const tutors = await User.find({ role: 'tutor' })
-      .select('name bio subjects hourlyRate isVerified avatar')
+      .select('name bio subjects hourlyRate rating isVerified avatar')
       .lean();
     res.json(tutors);
   } catch (err) {

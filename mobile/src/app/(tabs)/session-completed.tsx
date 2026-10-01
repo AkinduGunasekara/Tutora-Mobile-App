@@ -8,7 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { Primary, Spacing } from '@/constants/theme';
+
+const PAGE  = '#EFEDDC';
+const INK   = '#171943';
+const TEAL  = '#008C91';
+const MUTED = '#78809A';
+const CARD  = '#FFFFFF';
 
 function getInitials(name: string = '') {
   return name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
@@ -18,12 +23,12 @@ export default function SessionCompletedScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
   const { user }      = useAuth();
 
-  const [session,   setSession]   = useState<any>(null);
-  const [loading,   setLoading]   = useState(true);
-  const [rating,    setRating]    = useState(0);
-  const [review,    setReview]    = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting,setSubmitting]= useState(false);
+  const [session,   setSession]    = useState<any>(null);
+  const [loading,   setLoading]    = useState(true);
+  const [rating,    setRating]     = useState(0);
+  const [review,    setReview]     = useState('');
+  const [submitted, setSubmitted]  = useState(false);
+  const [submitting,setSubmitting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -52,7 +57,7 @@ export default function SessionCompletedScreen() {
   if (loading) return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.loadingWrap}>
-        <ActivityIndicator size="large" color={Primary} />
+        <ActivityIndicator size="large" color={TEAL} />
       </View>
     </SafeAreaView>
   );
@@ -65,19 +70,17 @@ export default function SessionCompletedScreen() {
     <SafeAreaView style={styles.safe}>
       {/* Header banner */}
       <View style={styles.banner}>
-        <Text style={styles.bannerEmoji}>🎉</Text>
-        <Text style={styles.bannerTitle}>Session Completed!</Text>
+        <View style={styles.bannerCheck}><Text style={styles.bannerCheckText}>✓</Text></View>
+        <Text style={styles.bannerTitle}>Session Completed</Text>
         <Text style={styles.bannerSub}>Great work — your session has ended</Text>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* Session summary */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>SESSION SUMMARY</Text>
-          <View style={styles.tutorRow}>
+          <Text style={styles.sectionLabel}>SESSION SUMMARY</Text>
+          <View style={styles.personRow}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{getInitials(isStudent ? tutor.name : student.name)}</Text>
             </View>
@@ -87,33 +90,30 @@ export default function SessionCompletedScreen() {
             </View>
           </View>
           <View style={styles.divider} />
-          <SummaryRow label="Subject"   value={session?.subject ?? '—'} />
-          <SummaryRow label="Duration"  value={`${session?.durationHours ?? '—'} hours`} />
-          <SummaryRow label="Date"      value={session?.scheduledDate
+          <SummaryRow label="Subject"  value={session?.subject ?? '—'} />
+          <View style={styles.divider} />
+          <SummaryRow label="Duration" value={`${session?.durationHours ?? '—'} hours`} />
+          <View style={styles.divider} />
+          <SummaryRow label="Date"     value={session?.scheduledDate
             ? new Date(session.scheduledDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
             : '—'} />
           <View style={styles.divider} />
-          <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>
-              {isStudent ? 'Total Paid' : 'Earnings'}
-            </Text>
-            <Text style={styles.paymentAmount}>Rs. {session?.totalAmount?.toLocaleString() ?? '—'}</Text>
+          <View style={styles.amountRow}>
+            <Text style={styles.amountLabel}>{isStudent ? 'Total Paid' : 'Earnings'}</Text>
+            <Text style={styles.amountValue}>Rs. {session?.totalAmount?.toLocaleString() ?? '—'}</Text>
           </View>
           <View style={styles.releasedPill}>
-            <Text style={styles.releasedText}>✓ PAYMENT RELEASED</Text>
+            <Text style={styles.releasedText}>PAYMENT RELEASED</Text>
           </View>
         </View>
 
-        {/* Rating */}
+        {/* Rating — students only */}
         {isStudent && (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>RATE YOUR SESSION</Text>
+            <Text style={styles.sectionLabel}>RATE YOUR SESSION</Text>
             <View style={styles.starsRow}>
               {[1, 2, 3, 4, 5].map((s) => (
-                <Pressable
-                  key={s}
-                  onPress={() => !submitted && setRating(s)}
-                  disabled={submitted}>
+                <Pressable key={s} onPress={() => !submitted && setRating(s)} disabled={submitted}>
                   <Text style={[styles.star, rating >= s && styles.starFilled]}>
                     {rating >= s ? '★' : '☆'}
                   </Text>
@@ -123,7 +123,7 @@ export default function SessionCompletedScreen() {
             <TextInput
               style={styles.reviewInput}
               placeholder="Share your experience with this tutor..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={MUTED}
               value={review}
               onChangeText={setReview}
               multiline
@@ -135,12 +135,12 @@ export default function SessionCompletedScreen() {
                 onPress={handleSubmitReview}
                 disabled={submitting}>
                 <Text style={styles.submitBtnText}>
-                  {submitting ? 'Submitting...' : 'Submit Review →'}
+                  {submitting ? 'Submitting...' : 'Submit Review'}
                 </Text>
               </Pressable>
             ) : (
               <View style={styles.reviewedBadge}>
-                <Text style={styles.reviewedText}>✓ Review Submitted</Text>
+                <Text style={styles.reviewedText}>Review Submitted</Text>
               </View>
             )}
           </View>
@@ -150,7 +150,7 @@ export default function SessionCompletedScreen() {
         <Pressable
           style={({ pressed }) => [styles.outlineBtn, pressed && { opacity: 0.75 }]}
           onPress={() => router.push({ pathname: '/(tabs)/session-workspace' as any, params: { sessionId } })}>
-          <Text style={styles.outlineBtnText}>📂  View Session Materials</Text>
+          <Text style={styles.outlineBtnText}>View Session Materials</Text>
         </Pressable>
 
         <Pressable
@@ -175,79 +175,81 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  safe:        { flex: 1, backgroundColor: '#F5F6FA' },
+  safe:        { flex: 1, backgroundColor: PAGE },
   loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   banner: {
-    backgroundColor: Primary, paddingVertical: 24, paddingHorizontal: Spacing.four,
-    alignItems: 'center', gap: 6,
+    backgroundColor: TEAL, paddingVertical: 28, paddingHorizontal: 24,
+    alignItems: 'center', gap: 8,
   },
-  bannerEmoji: { fontSize: 36 },
-  bannerTitle: { fontSize: 22, fontWeight: '800', color: '#fff' },
-  bannerSub:   { fontSize: 13, color: 'rgba(255,255,255,0.8)' },
+  bannerCheck: {
+    width: 52, height: 52, borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+  },
+  bannerCheckText: { color: '#fff', fontSize: 28, fontWeight: '700' },
+  bannerTitle:     { fontSize: 20, fontWeight: '800', color: '#fff' },
+  bannerSub:       { fontSize: 12, color: 'rgba(255,255,255,0.8)' },
 
-  scroll: { padding: Spacing.four, gap: Spacing.three },
+  scroll: { padding: 16, gap: 14 },
 
   card: {
-    backgroundColor: '#fff', borderRadius: 16, padding: Spacing.three, gap: Spacing.two,
+    backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, gap: 10,
     shadowColor: '#000', shadowOpacity: 0.04,
-    shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2,
+    shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
-  cardLabel: {
-    fontSize: 11, fontWeight: '700', color: '#9CA3AF',
-    letterSpacing: 0.8, textTransform: 'uppercase',
+  sectionLabel: {
+    fontSize: 10, fontWeight: '700', color: MUTED,
+    letterSpacing: 1, textTransform: 'uppercase',
   },
 
-  tutorRow:   { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  avatar:     {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: Primary, alignItems: 'center', justifyContent: 'center',
+  personRow:   { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar:      {
+    width: 44, height: 44, borderRadius: 8,
+    backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { color: '#fff', fontSize: 16, fontWeight: '800' },
-  personInfo: { gap: 2 },
-  personName: { fontSize: 15, fontWeight: '700', color: '#1A1A2E' },
-  personRole: { fontSize: 12, color: '#6B7280' },
-  divider:    { height: 1, backgroundColor: '#F3F4F6' },
+  avatarText:  { color: '#fff', fontSize: 15, fontWeight: '800' },
+  personInfo:  { gap: 2 },
+  personName:  { fontSize: 14, fontWeight: '700', color: INK },
+  personRole:  { fontSize: 11, color: MUTED },
+  divider:     { height: 1, backgroundColor: '#F0EFE5' },
 
   summaryRow:   { flexDirection: 'row', justifyContent: 'space-between' },
-  summaryLabel: { fontSize: 13, color: '#6B7280' },
-  summaryValue: { fontSize: 13, fontWeight: '600', color: '#1A1A2E' },
+  summaryLabel: { fontSize: 12, color: MUTED },
+  summaryValue: { fontSize: 12, fontWeight: '600', color: INK },
 
-  paymentRow:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  paymentLabel:  { fontSize: 15, fontWeight: '700', color: '#1A1A2E' },
-  paymentAmount: { fontSize: 22, fontWeight: '900', color: Primary },
-  releasedPill:  {
-    alignSelf: 'flex-start', backgroundColor: '#D1FAE5',
-    borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4,
+  amountRow:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  amountLabel:  { fontSize: 13, fontWeight: '700', color: INK },
+  amountValue:  { fontSize: 20, fontWeight: '800', color: TEAL },
+  releasedPill: {
+    alignSelf: 'flex-start', backgroundColor: '#E1F4EF',
+    borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4,
   },
-  releasedText: { fontSize: 11, color: '#059669', fontWeight: '700' },
+  releasedText: { fontSize: 10, color: TEAL, fontWeight: '700' },
 
-  // Stars
   starsRow:   { flexDirection: 'row', gap: 8 },
-  star:       { fontSize: 32, color: '#E5E7EB' },
-  starFilled: { color: '#FBBF24' },
+  star:       { fontSize: 30, color: '#D8D5C5' },
+  starFilled: { color: '#F59E0B' },
 
   reviewInput: {
-    backgroundColor: '#F5F6FA', borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB',
-    padding: 14, fontSize: 14, color: '#1A1A2E', minHeight: 90,
+    backgroundColor: PAGE, borderRadius: 10, borderWidth: 1, borderColor: '#E4E1D2',
+    padding: 12, fontSize: 13, color: INK, minHeight: 90,
     textAlignVertical: 'top',
   },
   submitBtn: {
-    backgroundColor: Primary, borderRadius: 100, paddingVertical: 14, alignItems: 'center',
-    shadowColor: Primary, shadowOpacity: 0.25, shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 }, elevation: 3,
+    backgroundColor: TEAL, borderRadius: 10, paddingVertical: 13, alignItems: 'center',
   },
-  submitBtnText:  { color: '#fff', fontSize: 15, fontWeight: '700' },
+  submitBtnText:  { color: '#fff', fontSize: 14, fontWeight: '700' },
   reviewedBadge:  {
-    backgroundColor: '#D1FAE5', borderRadius: 12, paddingVertical: 12, alignItems: 'center',
+    backgroundColor: '#E1F4EF', borderRadius: 10, paddingVertical: 12, alignItems: 'center',
   },
-  reviewedText: { fontSize: 13, color: '#059669', fontWeight: '700' },
+  reviewedText: { fontSize: 12, color: TEAL, fontWeight: '700' },
 
   outlineBtn: {
-    borderWidth: 1.5, borderColor: Primary, borderRadius: 12,
-    paddingVertical: 14, alignItems: 'center', backgroundColor: '#fff',
+    borderWidth: 1.5, borderColor: TEAL, borderRadius: 10,
+    paddingVertical: 13, alignItems: 'center', backgroundColor: '#FFFFFF',
   },
-  outlineBtnText: { fontSize: 14, color: Primary, fontWeight: '700' },
+  outlineBtnText: { fontSize: 13, color: TEAL, fontWeight: '700' },
   homeBtn:        { alignItems: 'center', paddingVertical: 10 },
-  homeBtnText:    { fontSize: 14, color: '#9CA3AF', fontWeight: '600' },
+  homeBtnText:    { fontSize: 13, color: MUTED, fontWeight: '600' },
 });

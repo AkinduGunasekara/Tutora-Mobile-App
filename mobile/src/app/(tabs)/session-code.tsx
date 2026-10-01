@@ -7,7 +7,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
-import { Primary, Spacing } from '@/constants/theme';
+
+const PAGE  = '#EFEDDC';
+const INK   = '#171943';
+const TEAL  = '#008C91';
+const MUTED = '#78809A';
 
 const LANGUAGES = ['JS', 'Python', 'Java', 'C++', 'SQL', 'HTML'];
 
@@ -32,9 +36,9 @@ const DEFAULT_CODE: Record<string, string> = {
 export default function SessionCodeScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
 
-  const [lang, setLang]       = useState('JS');
-  const [code, setCode]       = useState(DEFAULT_CODE['JS']);
-  const [output, setOutput]   = useState<string | null>(null);
+  const [lang,    setLang]    = useState('JS');
+  const [code,    setCode]    = useState(DEFAULT_CODE['JS']);
+  const [output,  setOutput]  = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [saving,  setSaving]  = useState(false);
 
@@ -80,21 +84,20 @@ export default function SessionCodeScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
-      <View style={styles.topbar}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Text style={styles.backIcon}>{'<'}</Text>
         </Pressable>
-        <Text style={styles.topbarTitle}>Code Sandbox</Text>
+        <Text style={styles.headerTitle}>Code Sandbox</Text>
         <Pressable style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-          <Text style={styles.saveBtnText}>{saving ? 'Saving...' : '💾 Save'}</Text>
+          <Text style={styles.saveBtnText}>{saving ? 'Saving...' : 'Save'}</Text>
         </Pressable>
       </View>
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {/* Language selector */}
         <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
+          horizontal showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.langRow}>
           {LANGUAGES.map((l) => (
             <Pressable
@@ -108,7 +111,6 @@ export default function SessionCodeScreen() {
 
         {/* Editor */}
         <View style={styles.editorWrap}>
-          {/* Line numbers */}
           <View style={styles.lineNumbers}>
             {code.split('\n').map((_, i) => (
               <Text key={i} style={styles.lineNumber}>{i + 1}</Text>
@@ -133,11 +135,11 @@ export default function SessionCodeScreen() {
             style={({ pressed }) => [styles.runBtn, pressed && { opacity: 0.85 }]}
             onPress={handleRun}
             disabled={running}>
-            <Text style={styles.runBtnText}>{running ? '⏳ Running...' : '▶  Run Code'}</Text>
+            <Text style={styles.runBtnText}>{running ? 'Running...' : 'Run Code'}</Text>
           </Pressable>
         </View>
 
-        {/* Output panel */}
+        {/* Output */}
         {output !== null && (
           <View style={styles.outputWrap}>
             <Text style={styles.outputLabel}>OUTPUT</Text>
@@ -152,7 +154,7 @@ export default function SessionCodeScreen() {
           <Pressable
             style={({ pressed }) => [styles.sendBtn, pressed && { opacity: 0.85 }]}
             onPress={handleSendToTutor}>
-            <Text style={styles.sendBtnText}>📤  Send to Tutor</Text>
+            <Text style={styles.sendBtnText}>Send to Tutor</Text>
           </Pressable>
         </View>
 
@@ -165,81 +167,55 @@ export default function SessionCodeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1E1E2E' },
 
-  topbar: {
+  header: {
     flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.three, paddingVertical: 12,
+    paddingHorizontal: 16, paddingVertical: 12,
     backgroundColor: '#16213E', borderBottomWidth: 1, borderBottomColor: '#2D2D44',
   },
-  backBtn: {
-    width: 34, height: 34, borderRadius: 17,
-    borderWidth: 1.5, borderColor: '#3D3D5C',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  backIcon:    { fontSize: 16, color: '#E0E0FF' },
-  topbarTitle: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '700', color: '#E0E0FF' },
-  saveBtn:     {
-    backgroundColor: Primary, borderRadius: 8,
-    paddingHorizontal: 12, paddingVertical: 6,
-  },
+  backIcon:    { fontSize: 20, color: '#E0E0FF', fontWeight: '600', width: 24 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '700', color: '#E0E0FF' },
+  saveBtn:     { backgroundColor: TEAL, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 6 },
   saveBtnText: { fontSize: 12, color: '#fff', fontWeight: '700' },
 
-  // Language chips
-  langRow: { paddingHorizontal: Spacing.three, paddingVertical: 12, gap: 8 },
+  langRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
   langChip: {
     paddingHorizontal: 16, paddingVertical: 7,
-    borderRadius: 20, borderWidth: 1, borderColor: '#3D3D5C',
+    borderRadius: 8, borderWidth: 1, borderColor: '#3D3D5C',
     backgroundColor: '#2D2D44',
   },
-  langChipActive:    { backgroundColor: Primary, borderColor: Primary },
+  langChipActive:    { backgroundColor: TEAL, borderColor: TEAL },
   langChipText:      { fontSize: 12, color: '#9CA3AF', fontWeight: '600' },
   langChipTextActive:{ color: '#fff' },
 
-  // Editor
   editorWrap: {
-    flexDirection: 'row',
-    marginHorizontal: Spacing.three,
-    backgroundColor: '#12121E',
-    borderRadius: 12, overflow: 'hidden',
-    borderWidth: 1, borderColor: '#2D2D44',
-    minHeight: 200,
+    flexDirection: 'row', marginHorizontal: 16,
+    backgroundColor: '#12121E', borderRadius: 10, overflow: 'hidden',
+    borderWidth: 1, borderColor: '#2D2D44', minHeight: 200,
   },
   lineNumbers: {
     paddingTop: 14, paddingHorizontal: 8,
-    backgroundColor: '#0D0D1A', minWidth: 36, alignItems: 'flex-end', gap: 0,
+    backgroundColor: '#0D0D1A', minWidth: 36, alignItems: 'flex-end',
   },
   lineNumber: { fontSize: 12, color: '#4D4D6E', lineHeight: 22, fontFamily: 'monospace' },
   editor: {
     flex: 1, padding: 14, fontSize: 13,
     color: '#E0E0FF', lineHeight: 22,
-    fontFamily: 'monospace',
-    textAlignVertical: 'top',
+    fontFamily: 'monospace', textAlignVertical: 'top',
   },
 
-  // Run
-  runRow:   { paddingHorizontal: Spacing.three, paddingTop: 16 },
-  runBtn:   {
-    backgroundColor: '#22C55E', borderRadius: 10,
-    paddingVertical: 13, alignItems: 'center',
-  },
-  runBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  runRow:   { paddingHorizontal: 16, paddingTop: 14 },
+  runBtn:   { backgroundColor: '#22C55E', borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
+  runBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
-  // Output
-  outputWrap: { padding: Spacing.three, gap: 8 },
-  outputLabel: {
-    fontSize: 11, fontWeight: '700', color: '#6B7280',
-    letterSpacing: 0.8, textTransform: 'uppercase',
-  },
-  outputBox: {
-    backgroundColor: '#0D0D1A', borderRadius: 10,
-    padding: 14, borderWidth: 1, borderColor: '#2D2D44',
-  },
-  outputText: { fontSize: 12, color: '#22C55E', fontFamily: 'monospace', lineHeight: 20 },
+  outputWrap:  { padding: 16, gap: 8 },
+  outputLabel: { fontSize: 10, fontWeight: '700', color: '#6B7280', letterSpacing: 1, textTransform: 'uppercase' },
+  outputBox:   { backgroundColor: '#0D0D1A', borderRadius: 8, padding: 12, borderWidth: 1, borderColor: '#2D2D44' },
+  outputText:  { fontSize: 12, color: '#22C55E', fontFamily: 'monospace', lineHeight: 20 },
 
-  // Actions
-  actions: { paddingHorizontal: Spacing.three, paddingTop: 8, gap: Spacing.two },
+  actions:     { paddingHorizontal: 16, paddingTop: 8 },
   sendBtn: {
-    borderWidth: 1.5, borderColor: Primary, borderRadius: 100,
-    paddingVertical: 13, alignItems: 'center',
+    borderWidth: 1.5, borderColor: TEAL, borderRadius: 8,
+    paddingVertical: 12, alignItems: 'center',
   },
-  sendBtnText: { color: Primary, fontSize: 14, fontWeight: '700' },
+  sendBtnText: { color: TEAL, fontSize: 13, fontWeight: '700' },
 });

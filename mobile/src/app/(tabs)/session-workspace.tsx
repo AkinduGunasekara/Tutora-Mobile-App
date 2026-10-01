@@ -7,7 +7,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
-import { Primary, Spacing } from '@/constants/theme';
+
+const PAGE  = '#EFEDDC';
+const INK   = '#171943';
+const TEAL  = '#008C91';
+const MUTED = '#78809A';
+const CARD  = '#FFFFFF';
 
 const TABS = ['Code', 'Files', 'Notes'] as const;
 type WorkspaceTab = typeof TABS[number];
@@ -19,9 +24,9 @@ const DEFAULT_CODE: Record<string, string> = {
   SQL: 'SELECT "Hello, World!" AS msg;', HTML: '<h1>Hello, World!</h1>',
 };
 const MOCK_FILES = [
-  { name: 'lecture_notes.pdf', type: 'pdf',      emoji: '📑' },
-  { name: 'exercise_set.docx', type: 'document', emoji: '📄' },
-  { name: 'solution.js',       type: 'code',     emoji: '💻' },
+  { name: 'lecture_notes.pdf', type: 'pdf' },
+  { name: 'exercise_set.docx', type: 'document' },
+  { name: 'solution.js',       type: 'code' },
 ];
 
 export default function SessionWorkspaceScreen() {
@@ -36,7 +41,7 @@ export default function SessionWorkspaceScreen() {
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      if (code) await api.post(`/session/${sessionId}/code`, { language: lang, code });
+      if (code)  await api.post(`/session/${sessionId}/code`, { language: lang, code });
       if (notes) await api.post(`/session/${sessionId}/code`, { language: 'text', code: notes });
       Alert.alert('Saved', 'All changes saved successfully.');
     } catch {
@@ -49,39 +54,36 @@ export default function SessionWorkspaceScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
-      <View style={styles.topbar}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Text style={styles.backIcon}>{'<'}</Text>
         </Pressable>
-        <Text style={styles.topbarTitle}>Session Workspace</Text>
+        <Text style={styles.headerTitle}>Session Workspace</Text>
         <Pressable
-          style={styles.endPill}
+          style={styles.endBtn}
           onPress={() => router.push({ pathname: '/(tabs)/session-completed' as any, params: { sessionId } })}>
-          <Text style={styles.endPillText}>🚪 End</Text>
+          <Text style={styles.endBtnText}>End</Text>
         </Pressable>
       </View>
 
-      {/* Tab pills */}
+      {/* Tabs */}
       <View style={styles.tabRow}>
         {TABS.map((t) => (
           <Pressable
             key={t}
-            style={[styles.tabPill, activeTab === t && styles.tabPillActive]}
+            style={[styles.tabBtn, activeTab === t && styles.tabBtnActive]}
             onPress={() => setActiveTab(t)}>
-            <Text style={[styles.tabPillText, activeTab === t && styles.tabPillTextActive]}>{t}</Text>
+            <Text style={[styles.tabBtnText, activeTab === t && styles.tabBtnTextActive]}>{t}</Text>
           </Pressable>
         ))}
       </View>
 
-      {/* Tab content */}
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
 
         {/* Code tab */}
         {activeTab === 'Code' && (
           <View style={styles.tabContent}>
-            <ScrollView
-              horizontal showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.langRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.langRow}>
               {LANGUAGES.map((l) => (
                 <Pressable
                   key={l}
@@ -112,15 +114,17 @@ export default function SessionWorkspaceScreen() {
           <View style={styles.tabContent}>
             {MOCK_FILES.map((f, i) => (
               <View key={i} style={styles.fileCard}>
-                <Text style={styles.fileEmoji}>{f.emoji}</Text>
+                <View style={styles.fileTag}>
+                  <Text style={styles.fileTagText}>{f.type.slice(0, 3).toUpperCase()}</Text>
+                </View>
                 <Text style={styles.fileName}>{f.name}</Text>
                 <Text style={styles.fileDownload}>↓</Text>
               </View>
             ))}
             <Pressable
-              style={styles.uploadBtn}
+              style={styles.filesRepoBtn}
               onPress={() => router.push({ pathname: '/(tabs)/session-files' as any, params: { sessionId } })}>
-              <Text style={styles.uploadBtnText}>📁  Open Files Repository</Text>
+              <Text style={styles.filesRepoBtnText}>Open Files Repository</Text>
             </Pressable>
           </View>
         )}
@@ -134,7 +138,7 @@ export default function SessionWorkspaceScreen() {
               onChangeText={setNotes}
               multiline
               placeholder="Write your session notes here..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={MUTED}
               textAlignVertical="top"
             />
           </View>
@@ -143,13 +147,13 @@ export default function SessionWorkspaceScreen() {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Save all button */}
+      {/* Bottom bar */}
       <View style={styles.bottomBar}>
         <Pressable
           style={({ pressed }) => [styles.saveAllBtn, (pressed || saving) && { opacity: 0.85 }]}
           onPress={handleSaveAll}
           disabled={saving}>
-          <Text style={styles.saveAllBtnText}>{saving ? 'Saving...' : '💾  Save All Changes'}</Text>
+          <Text style={styles.saveAllBtnText}>{saving ? 'Saving...' : 'Save All Changes'}</Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -157,51 +161,47 @@ export default function SessionWorkspaceScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F5F6FA' },
+  safe: { flex: 1, backgroundColor: PAGE },
 
-  topbar: {
+  header: {
     flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.three, paddingVertical: 12,
-    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E5E7EB', elevation: 2,
+    paddingHorizontal: 16, paddingVertical: 14,
+    backgroundColor: PAGE, borderBottomWidth: 1, borderBottomColor: '#E4E1D2',
   },
-  backBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    borderWidth: 1.5, borderColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center',
-  },
-  backIcon:    { fontSize: 18, color: '#1A1A2E' },
-  topbarTitle: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '700', color: '#1A1A2E' },
-  endPill: {
-    borderWidth: 1.5, borderColor: '#E5E7EB', borderRadius: 20,
+  backIcon:    { fontSize: 20, color: INK, fontWeight: '600', width: 24 },
+  headerTitle: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '700', color: INK },
+  endBtn: {
+    borderWidth: 1.5, borderColor: '#E4E1D2', borderRadius: 8,
     paddingHorizontal: 12, paddingVertical: 5,
   },
-  endPillText: { fontSize: 12, fontWeight: '600', color: '#374151' },
+  endBtnText: { fontSize: 12, fontWeight: '700', color: INK },
 
   tabRow: {
-    flexDirection: 'row', gap: 8, paddingHorizontal: Spacing.three,
-    paddingVertical: 12, backgroundColor: '#fff',
-    borderBottomWidth: 1, borderBottomColor: '#E5E7EB',
+    flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 12,
+    backgroundColor: CARD, borderBottomWidth: 1, borderBottomColor: '#E4E1D2',
   },
-  tabPill: {
-    flex: 1, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: '#F3F4F6', alignItems: 'center',
+  tabBtn: {
+    flex: 1, paddingVertical: 8, borderRadius: 8,
+    backgroundColor: PAGE, alignItems: 'center',
+    borderWidth: 1, borderColor: '#E4E1D2',
   },
-  tabPillActive:    { backgroundColor: Primary },
-  tabPillText:      { fontSize: 13, fontWeight: '600', color: '#6B7280' },
-  tabPillTextActive:{ color: '#fff' },
+  tabBtnActive:    { backgroundColor: TEAL, borderColor: TEAL },
+  tabBtnText:      { fontSize: 12, fontWeight: '600', color: MUTED },
+  tabBtnTextActive:{ color: '#fff' },
 
-  tabContent: { padding: Spacing.three, gap: Spacing.two },
+  tabContent: { padding: 16, gap: 10 },
 
   // Code
   langRow: { gap: 8, paddingBottom: 8 },
   langChip: {
-    paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20,
-    borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB',
+    paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8,
+    borderWidth: 1, borderColor: '#E4E1D2', backgroundColor: CARD,
   },
-  langChipActive:    { backgroundColor: Primary, borderColor: Primary },
-  langChipText:      { fontSize: 12, color: '#6B7280', fontWeight: '600' },
+  langChipActive:    { backgroundColor: TEAL, borderColor: TEAL },
+  langChipText:      { fontSize: 12, color: MUTED, fontWeight: '600' },
   langChipTextActive:{ color: '#fff' },
   editorWrap: {
-    backgroundColor: '#12121E', borderRadius: 12, overflow: 'hidden',
+    backgroundColor: '#12121E', borderRadius: 10, overflow: 'hidden',
     borderWidth: 1, borderColor: '#2D2D44', minHeight: 200,
   },
   editor: {
@@ -212,38 +212,40 @@ const styles = StyleSheet.create({
   // Files
   fileCard: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#fff', borderRadius: 12, padding: 14,
+    backgroundColor: CARD, borderRadius: 10, padding: 14,
     shadowColor: '#000', shadowOpacity: 0.03,
     shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 1,
   },
-  fileEmoji:    { fontSize: 22 },
-  fileName:     { flex: 1, fontSize: 13, fontWeight: '600', color: '#1A1A2E' },
-  fileDownload: { fontSize: 18, color: Primary, fontWeight: '700' },
-  uploadBtn: {
-    borderWidth: 1.5, borderColor: Primary, borderRadius: 12,
-    paddingVertical: 14, alignItems: 'center', marginTop: 4,
+  fileTag:        {
+    width: 36, height: 36, borderRadius: 6,
+    backgroundColor: '#E1F4EF', alignItems: 'center', justifyContent: 'center',
   },
-  uploadBtnText: { fontSize: 14, color: Primary, fontWeight: '700' },
+  fileTagText:    { fontSize: 8, fontWeight: '800', color: TEAL },
+  fileName:       { flex: 1, fontSize: 13, fontWeight: '600', color: INK },
+  fileDownload:   { fontSize: 16, color: TEAL, fontWeight: '700' },
+  filesRepoBtn: {
+    borderWidth: 1.5, borderColor: TEAL, borderRadius: 10,
+    paddingVertical: 13, alignItems: 'center', marginTop: 4,
+  },
+  filesRepoBtnText: { fontSize: 13, color: TEAL, fontWeight: '700' },
 
   // Notes
   notesInput: {
-    backgroundColor: '#fff', borderRadius: 12, padding: 16,
-    fontSize: 14, color: '#1A1A2E', lineHeight: 22,
-    minHeight: 300, borderWidth: 1, borderColor: '#E5E7EB',
+    backgroundColor: CARD, borderRadius: 10, padding: 14,
+    fontSize: 13, color: INK, lineHeight: 22,
+    minHeight: 300, borderWidth: 1, borderColor: '#E4E1D2',
     textAlignVertical: 'top',
   },
 
   // Bottom
   bottomBar: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
-    paddingHorizontal: Spacing.four, paddingBottom: 24, paddingTop: 12,
-    backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#E5E7EB',
+    paddingHorizontal: 16, paddingBottom: 24, paddingTop: 12,
+    backgroundColor: CARD, borderTopWidth: 1, borderTopColor: '#E4E1D2',
   },
   saveAllBtn: {
-    backgroundColor: Primary, borderRadius: 100,
-    paddingVertical: 15, alignItems: 'center',
-    shadowColor: Primary, shadowOpacity: 0.3,
-    shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4,
+    backgroundColor: TEAL, borderRadius: 10,
+    paddingVertical: 14, alignItems: 'center',
   },
-  saveAllBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  saveAllBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

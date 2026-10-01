@@ -73,6 +73,7 @@ exports.createBooking = async (req, res) => {
       meetingType,
       message: message.trim(),
       fees: { session: sessionFee, platform: 0, total: sessionFee },
+      status: 'confirmed',
     });
 
     return res.status(201).json({

@@ -101,7 +101,19 @@ export default function BookingSummaryScreen() {
           hourlyRate: hourlyAmount,
         },
       });
-      setBookingId(data.booking.id);
+      const savedId = String(data.booking.id);
+      setBookingId(savedId);
+      router.replace({
+        pathname: '/(tabs)/booking-confirmed' as any,
+        params: {
+          bookingId: savedId,
+          dateLabel,
+          time,
+          duration,
+          meetingType,
+          tutorName,
+        },
+      });
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message ?? 'Could not save your booking. Please try again.');
     } finally {

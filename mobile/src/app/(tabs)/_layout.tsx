@@ -71,6 +71,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="session-details" options={{ href: null }} />
       {/* Booking summary follows the session details step. */}
       <Tabs.Screen name="booking-summary" options={{ href: null }} />
+      {/* Confirmation follows a successful booking save. */}
+      <Tabs.Screen name="booking-confirmed" options={{ href: null }} />
     </Tabs>
   );
 }

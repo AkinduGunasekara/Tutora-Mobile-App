@@ -6,6 +6,7 @@ const {
   getUserSessions,
   createSession,
   getSession,
+  getSessionByBooking,
   confirmPayment,
   startSession,
   addMessage,
@@ -14,10 +15,11 @@ const {
   saveCodeSnapshot,
 } = require('./sessionController');
 
-// /my must come before /:id so Express doesn't treat "my" as an ID
-router.get('/my',                    protect, getUserSessions);
-router.post('/',                     protect, createSession);
-router.get('/:id',                   protect, getSession);
+// static routes must come before /:id so Express doesn't treat them as IDs
+router.get('/my',                         protect, getUserSessions);
+router.get('/by-booking/:bookingId',      protect, getSessionByBooking);
+router.post('/',                          protect, createSession);
+router.get('/:id',                        protect, getSession);
 router.patch('/:id/confirm-payment', protect, confirmPayment);
 router.patch('/:id/start',           protect, startSession);
 router.post('/:id/message',          protect, addMessage);

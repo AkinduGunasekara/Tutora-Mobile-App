@@ -73,7 +73,21 @@ export default function CancelSessionScreen() {
     setErrorMessage('');
     try {
       await api.patch(`/bookings/${bookingId}/cancel`, { reason });
-      router.replace({ pathname: '/(tabs)/bookings' as any, params: { date } });
+      router.replace({
+        pathname: '/(tabs)/session-cancelled' as any,
+        params: {
+          bookingId,
+          date,
+          time,
+          durationMinutes: String(durationMinutes),
+          meetingType,
+          tutorName,
+          tutorSubtitle,
+          sessionTitle,
+          refund: String(refund),
+          cancelledOn: new Date().toISOString(),
+        },
+      });
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message ?? 'Could not cancel this session. Please try again.');
     } finally {
@@ -89,7 +103,11 @@ export default function CancelSessionScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Back to My Calendar" onPress={() => router.back()} hitSlop={10}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to My Calendar"
+            onPress={() => router.replace({ pathname: '/(tabs)/bookings' as any, params: { date } })}
+            hitSlop={10}>
             <Text style={styles.back}>‹</Text>
           </Pressable>
           <Text style={styles.headerTitle}>Cancel Session</Text>

@@ -77,6 +77,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="reschedule-session" options={{ href: null }} />
       {/* Cancellation review for a scheduled booking. */}
       <Tabs.Screen name="cancel-session" options={{ href: null }} />
+      {/* Cancellation result screen shown after the API confirms cancellation. */}
+      <Tabs.Screen name="session-cancelled" options={{ href: null }} />
       {/* Reschedule confirmation is shown before saving the change. */}
       <Tabs.Screen name="reschedule-confirmation" options={{ href: null }} />
     </Tabs>

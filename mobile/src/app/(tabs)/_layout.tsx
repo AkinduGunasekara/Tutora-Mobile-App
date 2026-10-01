@@ -117,6 +117,14 @@ export default function TabsLayout() {
       <Tabs.Screen name="session-video"            options={{ href: null }} />
       <Tabs.Screen name="session-workspace"        options={{ href: null }} />
       <Tabs.Screen name="session-completed"        options={{ href: null }} />
+
+      {/* ── Discovery module screens (IT23732254) ── */}
+      <Tabs.Screen name="tutor-filters"            options={{ href: null }} />
+      <Tabs.Screen name="tutor-profile"            options={{ href: null }} />
+      <Tabs.Screen name="tutor-reviews"            options={{ href: null }} />
+      <Tabs.Screen name="request-custom-session"   options={{ href: null }} />
+      <Tabs.Screen name="request-sent"             options={{ href: null }} />
+      <Tabs.Screen name="write-review"             options={{ href: null }} />
     </Tabs>
   );
 }

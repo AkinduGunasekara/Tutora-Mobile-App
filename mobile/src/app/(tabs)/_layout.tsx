@@ -65,6 +65,12 @@ export default function TabsLayout() {
       <Tabs.Screen name="explore" options={{ href: null }} />
       {/* Hide edit-profile from tab bar */}
       <Tabs.Screen name="edit-profile" options={{ href: null }} />
+      {/* Schedule is opened from tutor selection, not from the tab bar. */}
+      <Tabs.Screen name="schedule" options={{ href: null }} />
+      {/* Session details follow schedule selection and stay off the tab bar. */}
+      <Tabs.Screen name="session-details" options={{ href: null }} />
+      {/* Booking summary follows the session details step. */}
+      <Tabs.Screen name="booking-summary" options={{ href: null }} />
     </Tabs>
   );
 }

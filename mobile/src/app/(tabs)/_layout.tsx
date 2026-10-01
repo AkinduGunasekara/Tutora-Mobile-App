@@ -61,26 +61,31 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
         }}
       />
-      {/* Hide old explore screen from tab bar */}
-      <Tabs.Screen name="explore" options={{ href: null }} />
-      {/* Hide edit-profile from tab bar */}
-      <Tabs.Screen name="edit-profile" options={{ href: null }} />
-      {/* Schedule is opened from tutor selection, not from the tab bar. */}
-      <Tabs.Screen name="schedule" options={{ href: null }} />
-      {/* Session details follow schedule selection and stay off the tab bar. */}
-      <Tabs.Screen name="session-details" options={{ href: null }} />
-      {/* Booking summary follows the session details step. */}
-      <Tabs.Screen name="booking-summary" options={{ href: null }} />
-      {/* Confirmation follows a successful booking save. */}
-      <Tabs.Screen name="booking-confirmed" options={{ href: null }} />
-      {/* Rescheduling edits an existing booking. */}
-      <Tabs.Screen name="reschedule-session" options={{ href: null }} />
-      {/* Cancellation review for a scheduled booking. */}
-      <Tabs.Screen name="cancel-session" options={{ href: null }} />
-      {/* Cancellation result screen shown after the API confirms cancellation. */}
-      <Tabs.Screen name="session-cancelled" options={{ href: null }} />
-      {/* Reschedule confirmation is shown before saving the change. */}
-      <Tabs.Screen name="reschedule-confirmation" options={{ href: null }} />
+
+      {/* ── Booking module screens (IT23730656) ── */}
+      <Tabs.Screen name="explore"                  options={{ href: null }} />
+      <Tabs.Screen name="edit-profile"             options={{ href: null }} />
+      <Tabs.Screen name="schedule"                 options={{ href: null }} />
+      <Tabs.Screen name="session-details"          options={{ href: null }} />
+      <Tabs.Screen name="booking-summary"          options={{ href: null }} />
+      <Tabs.Screen name="booking-confirmed"        options={{ href: null }} />
+      <Tabs.Screen name="reschedule-session"       options={{ href: null }} />
+      <Tabs.Screen name="cancel-session"           options={{ href: null }} />
+      <Tabs.Screen name="session-cancelled"        options={{ href: null }} />
+      <Tabs.Screen name="reschedule-confirmation"  options={{ href: null }} />
+
+      {/* ── Payment & Session module screens (IT23730892) ── */}
+      <Tabs.Screen name="payment-summary"          options={{ href: null }} />
+      <Tabs.Screen name="payment-bank-slip"        options={{ href: null }} />
+      <Tabs.Screen name="payment-processing"       options={{ href: null }} />
+      <Tabs.Screen name="payment-success"          options={{ href: null }} />
+      <Tabs.Screen name="session-booking-confirm"  options={{ href: null }} />
+      <Tabs.Screen name="session-chat"             options={{ href: null }} />
+      <Tabs.Screen name="session-files"            options={{ href: null }} />
+      <Tabs.Screen name="session-code"             options={{ href: null }} />
+      <Tabs.Screen name="session-video"            options={{ href: null }} />
+      <Tabs.Screen name="session-workspace"        options={{ href: null }} />
+      <Tabs.Screen name="session-completed"        options={{ href: null }} />
     </Tabs>
   );
 }

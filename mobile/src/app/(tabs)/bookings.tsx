@@ -144,7 +144,7 @@ export default function BookingsScreen() {
 
   const startReschedule = (booking: Booking) => {
     router.push({
-      pathname: '/(tabs)/schedule' as any,
+      pathname: '/(tabs)/reschedule-session' as any,
       params: {
         bookingId: booking._id,
         date: dateParam(fromStoredDate(booking.sessionDate)),

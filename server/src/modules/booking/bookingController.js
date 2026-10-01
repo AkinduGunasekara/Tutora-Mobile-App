@@ -139,7 +139,7 @@ exports.rescheduleBooking = async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ message: 'Booking ID is invalid' });
     }
-    const { date, time, durationMinutes, meetingType, message = '' } = req.body;
+    const { date, time, durationMinutes, meetingType, message = '', reason = '' } = req.body;
     const sessionDate = getSessionDate(date);
     if (!sessionDate) return res.status(400).json({ message: 'A valid session date is required' });
     if (!isValidTime(time)) return res.status(400).json({ message: 'A valid session start time is required' });
@@ -151,6 +151,9 @@ exports.rescheduleBooking = async (req, res) => {
     }
     if (typeof message !== 'string' || message.length > 500) {
       return res.status(400).json({ message: 'The message must be 500 characters or fewer' });
+    }
+    if (typeof reason !== 'string' || reason.length > 500) {
+      return res.status(400).json({ message: 'The reason must be 500 characters or fewer' });
     }
 
     const booking = await Booking.findOne({ _id: req.params.id, student: req.user._id });
@@ -164,6 +167,7 @@ exports.rescheduleBooking = async (req, res) => {
     booking.durationMinutes = Number(durationMinutes);
     booking.meetingType = meetingType;
     booking.message = message.trim();
+    booking.rescheduleReason = reason.trim();
     const fee = Math.round(booking.tutor.hourlyRate * booking.durationMinutes / 60);
     booking.fees = { session: fee, platform: 0, total: fee };
     await booking.save();

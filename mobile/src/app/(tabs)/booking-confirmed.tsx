@@ -1,5 +1,4 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -44,8 +43,6 @@ export default function BookingConfirmedScreen() {
     tutorName?: string;
     wasRescheduled?: string;
   }>();
-  const [showPaymentNote, setShowPaymentNote] = useState(false);
-
   const bookingId = asText(params.bookingId, '');
   const wasRescheduled = asText(params.wasRescheduled, 'false') === 'true';
   const dateLabel = asText(params.dateLabel, 'Wed, Oct 14, 2026');
@@ -69,20 +66,20 @@ export default function BookingConfirmedScreen() {
           <View style={styles.hero}>
             <View style={styles.checkCircle}><Text style={styles.check}>✓</Text></View>
             <Text style={styles.title}>{wasRescheduled ? 'Session Rescheduled!' : 'Booking Confirmed!'}</Text>
-            <Text style={styles.bookingId}>Booking ID: {displayId}</Text>
-            <Text style={styles.subtitle}>{wasRescheduled ? 'Your updated session details have been saved.' : 'Your booking details have been saved.'}</Text>
+            {!wasRescheduled && <Text style={styles.bookingId}>Booking ID: {displayId}</Text>}
+            <Text style={styles.subtitle}>{wasRescheduled ? 'Your calendar and session details have been updated.' : 'Your booking details have been saved.'}</Text>
           </View>
 
           <View style={styles.detailsCard}>
             <SummaryRow label="Tutor" value={tutorName} />
-            <SummaryRow label="Date" value={dateLabel} />
-            <SummaryRow label="Time" value={`${time} - ${getEndTime(time, durationHours)}`} />
+            <SummaryRow label={wasRescheduled ? 'New Date' : 'Date'} value={dateLabel} />
+            <SummaryRow label={wasRescheduled ? 'New Time' : 'Time'} value={`${time} - ${getEndTime(time, durationHours)}`} />
             <SummaryRow label="Duration" value={durationLabel} />
             <SummaryRow label="Type" value={meetingLabel} />
             <View style={styles.statusDivider} />
             <View style={styles.statusRow}>
               <Text style={styles.label}>Status</Text>
-              <View style={styles.statusBadge}><Text style={styles.statusText}>Confirmed</Text></View>
+              <View style={styles.statusBadge}><Text style={styles.statusText}>{wasRescheduled ? 'Rescheduled' : 'Confirmed'}</Text></View>
             </View>
           </View>
 
@@ -95,15 +92,10 @@ export default function BookingConfirmedScreen() {
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              onPress={() => setShowPaymentNote((visible) => !visible)}
-              style={({ pressed }) => [styles.paymentButton, pressed && styles.pressed]}>
-              <Text style={styles.paymentButtonText}>Secure Payment</Text>
+              onPress={() => router.replace('/(tabs)/home' as any)}
+              style={({ pressed }) => [wasRescheduled ? styles.homeButton : styles.paymentButton, pressed && styles.pressed]}>
+              <Text style={wasRescheduled ? styles.homeButtonText : styles.paymentButtonText}>{wasRescheduled ? 'Back to Home' : 'Secure Payment'}</Text>
             </Pressable>
-            {showPaymentNote && (
-              <Text accessibilityLiveRegion="polite" style={styles.paymentNote}>
-                Payment will be available in a later step.
-              </Text>
-            )}
           </View>
         </ScrollView>
       </View>
@@ -123,7 +115,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAGE },
   page: { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', backgroundColor: PAGE },
-  content: { flexGrow: 1, padding: 16, paddingTop: 40, paddingBottom: 22, justifyContent: 'center', gap: 22 },
+  content: { flexGrow: 1, padding: 16, paddingTop: 32, paddingBottom: 22, justifyContent: 'center', gap: 22 },
   hero: { alignItems: 'center', gap: 7 },
   checkCircle: {
     width: 58,
@@ -137,7 +129,7 @@ const styles = StyleSheet.create({
   check: { color: '#FFFFFF', fontSize: 33, lineHeight: 38, fontWeight: '400' },
   title: { color: INK, fontSize: 19, fontWeight: '800', textAlign: 'center' },
   bookingId: { color: TEAL, fontSize: 11, fontWeight: '700' },
-  subtitle: { color: MUTED, fontSize: 10, textAlign: 'center' },
+  subtitle: { color: MUTED, fontSize: 10, textAlign: 'center', maxWidth: 270, lineHeight: 14 },
   detailsCard: { backgroundColor: '#FFFFFF', borderRadius: 12, padding: 13 },
   row: { minHeight: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   label: { color: MUTED, fontSize: 10 },
@@ -151,6 +143,7 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
   paymentButton: { minHeight: 40, borderRadius: 9, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
   paymentButtonText: { color: TEAL, fontSize: 12, fontWeight: '700' },
-  paymentNote: { color: MUTED, fontSize: 10, textAlign: 'center' },
+  homeButton: { minHeight: 40, borderRadius: 9, borderWidth: 1.5, borderColor: TEAL, backgroundColor: PAGE, alignItems: 'center', justifyContent: 'center' },
+  homeButtonText: { color: TEAL, fontSize: 12, fontWeight: '700' },
   pressed: { opacity: 0.82 },
 });

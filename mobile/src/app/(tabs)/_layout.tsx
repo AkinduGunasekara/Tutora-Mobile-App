@@ -73,6 +73,10 @@ export default function TabsLayout() {
       <Tabs.Screen name="booking-summary" options={{ href: null }} />
       {/* Confirmation follows a successful booking save. */}
       <Tabs.Screen name="booking-confirmed" options={{ href: null }} />
+      {/* Rescheduling edits an existing booking. */}
+      <Tabs.Screen name="reschedule-session" options={{ href: null }} />
+      {/* Reschedule confirmation is shown before saving the change. */}
+      <Tabs.Screen name="reschedule-confirmation" options={{ href: null }} />
     </Tabs>
   );
 }

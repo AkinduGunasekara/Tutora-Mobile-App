@@ -59,7 +59,8 @@ exports.getSession = async (req, res) => {
   try {
     const session = await Session.findById(req.params.id)
       .populate('student', 'name avatar email')
-      .populate('tutor',   'name avatar hourlyRate bio subjects isVerified');
+      .populate('tutor',   'name avatar hourlyRate bio subjects isVerified')
+      .populate('messages.sender', 'name avatar');
 
     if (!session) return res.status(404).json({ message: 'Session not found' });
 
@@ -159,6 +160,20 @@ exports.completeSession = async (req, res) => {
     ).populate('student', 'name avatar').populate('tutor', 'name avatar');
 
     if (!session) return res.status(404).json({ message: 'Session not found' });
+    res.json(session);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// GET /api/session/by-booking/:bookingId
+exports.getSessionByBooking = async (req, res) => {
+  try {
+    const session = await Session.findOne({ bookingId: req.params.bookingId })
+      .populate('student', 'name avatar email')
+      .populate('tutor',   'name avatar hourlyRate bio subjects isVerified')
+      .populate('messages.sender', 'name avatar');
+    if (!session) return res.status(404).json({ message: 'No session found for this booking' });
     res.json(session);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

@@ -7,6 +7,6 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
-router.get('/tutors', protect, getTutors);
+router.get('/tutors', getTutors); // public — no auth required
 
 module.exports = router;

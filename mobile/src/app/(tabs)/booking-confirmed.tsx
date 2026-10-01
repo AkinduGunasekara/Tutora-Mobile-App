@@ -73,7 +73,7 @@ export default function BookingConfirmedScreen() {
             <View style={styles.checkCircle}><Text style={styles.check}>✓</Text></View>
             <Text style={styles.title}>{wasRescheduled ? 'Session Rescheduled!' : 'Booking Confirmed!'}</Text>
             {!wasRescheduled && <Text style={styles.bookingId}>Booking ID: {displayId}</Text>}
-            <Text style={styles.subtitle}>{wasRescheduled ? 'Your calendar and session details have been updated.' : 'Your booking details have been saved.'}</Text>
+            <Text style={styles.subtitle}>{wasRescheduled ? 'Your calendar and session details have been updated.' : 'Your request has been sent. Pay once the tutor confirms.'}</Text>
           </View>
 
           <View style={styles.detailsCard}>
@@ -85,7 +85,7 @@ export default function BookingConfirmedScreen() {
             <View style={styles.statusDivider} />
             <View style={styles.statusRow}>
               <Text style={styles.label}>Status</Text>
-              <View style={styles.statusBadge}><Text style={styles.statusText}>{wasRescheduled ? 'Rescheduled' : 'Confirmed'}</Text></View>
+              <View style={styles.statusBadge}><Text style={styles.statusText}>{wasRescheduled ? 'Rescheduled' : 'Pending'}</Text></View>
             </View>
           </View>
 
@@ -98,26 +98,9 @@ export default function BookingConfirmedScreen() {
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              onPress={() => {
-                if (wasRescheduled) {
-                  router.replace('/(tabs)/home' as any);
-                } else {
-                  router.push({
-                    pathname: '/(tabs)/payment-summary' as any,
-                    params: {
-                      bookingId,
-                      tutorId,
-                      tutorName,
-                      subject,
-                      durationHours: String(durationHours),
-                      hourlyRate,
-                      scheduledDate: asText(params.date, new Date().toISOString()),
-                    },
-                  });
-                }
-              }}
-              style={({ pressed }) => [wasRescheduled ? styles.homeButton : styles.paymentButton, pressed && styles.pressed]}>
-              <Text style={wasRescheduled ? styles.homeButtonText : styles.paymentButtonText}>{wasRescheduled ? 'Back to Home' : 'Secure Payment'}</Text>
+              onPress={() => router.replace('/(tabs)/bookings' as any)}
+              style={({ pressed }) => [styles.homeButton, pressed && styles.pressed]}>
+              <Text style={styles.homeButtonText}>{wasRescheduled ? 'Back to Home' : 'View My Bookings'}</Text>
             </Pressable>
           </View>
         </ScrollView>

@@ -38,15 +38,16 @@ export default function TutorFiltersScreen() {
   };
 
   const applyFilters = () => {
-    router.setParams({
-      ...params,
-      subject: subject || undefined,
-      minPrice: minPrice || undefined,
-      maxPrice: maxPrice || undefined,
-      minRating: minRating !== '0' ? minRating : undefined,
-      mode: mode || undefined,
+    router.replace({
+      pathname: '/(tabs)/search',
+      params: {
+        subject: subject || undefined,
+        minPrice: minPrice || undefined,
+        maxPrice: maxPrice || undefined,
+        minRating: minRating !== '0' ? minRating : undefined,
+        mode: mode || undefined,
+      },
     });
-    router.back();
   };
 
   const clearFilters = () => {
@@ -72,7 +73,7 @@ export default function TutorFiltersScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="close" size={28} color="#1A1A2E" />
+          <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Filter Tutors</Text>
         <TouchableOpacity onPress={clearFilters}>
@@ -196,7 +197,7 @@ export default function TutorFiltersScreen() {
               <Ionicons
                 name="globe-outline"
                 size={20}
-                color={mode === 'online' ? '#008C91' : '#6B7280'}
+                color={mode === 'online' ? '#006666' : '#6B7280'}
               />
               <Text
                 style={[
@@ -217,7 +218,7 @@ export default function TutorFiltersScreen() {
               <Ionicons
                 name="person-outline"
                 size={20}
-                color={mode === 'in-person' ? '#008C91' : '#6B7280'}
+                color={mode === 'in-person' ? '#006666' : '#6B7280'}
               />
               <Text
                 style={[
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   clearText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#008C91',
+    color: '#006666',
   },
   content: {
     flex: 1,
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
   },
   subjectChipActive: {
     backgroundColor: '#E8F5F5',
-    borderColor: '#008C91',
+    borderColor: '#006666',
   },
   subjectChipText: {
     fontSize: 13,
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   subjectChipTextActive: {
-    color: '#008C91',
+    color: '#006666',
     fontWeight: '600',
   },
   priceContainer: {
@@ -366,8 +367,8 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   dayChipActive: {
-    backgroundColor: '#008C91',
-    borderColor: '#008C91',
+    backgroundColor: '#006666',
+    borderColor: '#006666',
   },
   dayChipText: {
     fontSize: 13,
@@ -395,7 +396,7 @@ const styles = StyleSheet.create({
   },
   modeChipActive: {
     backgroundColor: '#E8F5F5',
-    borderColor: '#008C91',
+    borderColor: '#006666',
   },
   modeChipText: {
     fontSize: 14,
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   modeChipTextActive: {
-    color: '#008C91',
+    color: '#006666',
   },
   footer: {
     padding: 20,
@@ -412,7 +413,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   applyButton: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

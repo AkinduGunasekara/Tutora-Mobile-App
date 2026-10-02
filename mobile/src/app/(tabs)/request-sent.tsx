@@ -17,11 +17,11 @@ export default function RequestSentScreen() {
   } = params;
 
   const navigateToCalendar = () => {
-    router.push('/bookings');
+    router.push('/(tabs)/bookings');
   };
 
   const navigateToHome = () => {
-    router.push('/home');
+    router.push('/(tabs)/home');
   };
 
   return (
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   secondaryButtonText: {
-    color: '#008C91',
+    color: '#006666',
     fontSize: 16,
     fontWeight: '700',
   },

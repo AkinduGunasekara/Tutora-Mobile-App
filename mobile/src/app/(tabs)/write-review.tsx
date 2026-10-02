@@ -109,7 +109,7 @@ export default function WriteReviewScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#008C91" />
+          <ActivityIndicator size="large" color="#006666" />
         </View>
       </SafeAreaView>
     );
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   avatarPlaceholder: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   tagActive: {
     backgroundColor: '#E8F5F5',
-    borderColor: '#008C91',
+    borderColor: '#006666',
   },
   tagText: {
     fontSize: 13,
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   tagTextActive: {
-    color: '#008C91',
+    color: '#006666',
     fontWeight: '600',
   },
   textArea: {
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
   },
   submitButton: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

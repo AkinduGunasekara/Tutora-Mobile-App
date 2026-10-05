@@ -74,7 +74,10 @@ export default function SessionVideoScreen() {
     );
   };
 
-  const tutorName   = session?.tutor?.name ?? 'Tutor';
+  // Main tile shows the other participant, the small tile shows you
+  const tutorName   = user?.role === 'tutor'
+    ? session?.student?.name ?? 'Student'
+    : session?.tutor?.name ?? 'Tutor';
   const studentName = user?.name           ?? 'You';
 
   return (

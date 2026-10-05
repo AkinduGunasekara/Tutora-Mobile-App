@@ -7,7 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
+import { homeRouteFor, useAuth } from '@/context/AuthContext';
 
 const PAGE  = '#EFEDDC';
 const INK   = '#171943';
@@ -155,7 +155,7 @@ export default function SessionCompletedScreen() {
 
         <Pressable
           style={({ pressed }) => [styles.homeBtn, pressed && { opacity: 0.75 }]}
-          onPress={() => router.replace('/(tabs)/home' as any)}>
+          onPress={() => router.replace(homeRouteFor(user?.role ?? 'student'))}>
           <Text style={styles.homeBtnText}>Back to Home</Text>
         </Pressable>
 

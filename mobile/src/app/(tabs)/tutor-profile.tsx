@@ -55,7 +55,16 @@ export default function TutorProfileScreen() {
   };
 
   const navigateToAvailability = () => {
-    router.push(`/schedule?tutorId=${tutorId}`);
+    router.push({
+      pathname: '/schedule',
+      params: {
+        tutorId,
+        tutorName: tutor?.name,
+        tutorSubtitle: tutor?.subjects?.[0] ?? 'General',
+        hourlyRate: String(tutor?.hourlyRate ?? 0),
+        tutorInitials: tutor?.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase(),
+      },
+    });
   };
 
   const navigateToCustomSession = () => {

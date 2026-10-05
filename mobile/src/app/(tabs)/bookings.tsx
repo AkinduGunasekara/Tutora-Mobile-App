@@ -321,10 +321,10 @@ export default function BookingsScreen() {
 
                       <View style={styles.sessionMeta}>
                         <Text style={styles.timeMeta}>
-                          📅 {fromStoredDate(booking.sessionDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {fromStoredDate(booking.sessionDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </Text>
                         <Text style={styles.timeMeta}>
-                          ◷ {booking.startTime} · {booking.durationMinutes} min
+                          {booking.startTime} · {booking.durationMinutes} min
                         </Text>
                       </View>
 
@@ -431,8 +431,8 @@ export default function BookingsScreen() {
                     <View style={styles.cardDivider} />
 
                     <View style={styles.sessionMeta}>
-                      <Text style={styles.timeMeta}>◷ {booking.startTime} - {getEndTime(booking.startTime, booking.durationMinutes)}</Text>
-                      <Text style={styles.meetingMeta}>{booking.meetingType === 'Microsoft Teams' ? '▣ Teams Meeting' : '⌂ In-Person'}</Text>
+                      <Text style={styles.timeMeta}>{booking.startTime} – {getEndTime(booking.startTime, booking.durationMinutes)}</Text>
+                      <Text style={styles.meetingMeta}>{booking.meetingType === 'Microsoft Teams' ? 'Teams Meeting' : 'In-Person'}</Text>
                     </View>
 
                     {/* Join button */}
@@ -440,13 +440,13 @@ export default function BookingsScreen() {
                       <Pressable
                         style={({ pressed }) => [styles.joinBtn, pressed && { opacity: 0.8 }]}
                         onPress={() => handleJoinSession(booking)}>
-                        <Text style={styles.joinBtnText}>🎥 Join Session</Text>
+                        <Text style={styles.joinBtnText}>Join Session</Text>
                       </Pressable>
                     ) : (
                       <Pressable
                         style={({ pressed }) => [styles.payJoinBtn, pressed && { opacity: 0.8 }]}
                         onPress={() => handlePayAndJoin(booking)}>
-                        <Text style={styles.payJoinBtnText}>💳 Pay &amp; Join</Text>
+                        <Text style={styles.payJoinBtnText}>Pay &amp; Join</Text>
                       </Pressable>
                     )}
                   </View>

@@ -33,6 +33,7 @@ export default function SessionDetailsScreen() {
     dateLabel?: string;
     time?: string;
     duration?: string;
+    tutorId?: string;
     tutorName?: string;
     tutorSubtitle?: string;
     rating?: string;
@@ -71,6 +72,7 @@ export default function SessionDetailsScreen() {
         duration,
         meetingType,
         message,
+        tutorId: params.tutorId,
         tutorName,
         tutorSubtitle,
         rating,
@@ -93,6 +95,7 @@ export default function SessionDetailsScreen() {
         durationMinutes: String(durationToMinutes(duration)),
         meetingType,
         message,
+        tutorId: params.tutorId,
         tutorName,
         tutorSubtitle,
         rating,

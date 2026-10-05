@@ -37,6 +37,9 @@ export default function RequestCustomSessionScreen() {
   const [duration, setDuration] = useState('1');
   const [description, setDescription] = useState('');
   const [estimatedBudget, setEstimatedBudget] = useState('');
+  const [academicLevel, setAcademicLevel] = useState('');
+  const [learningObjective, setLearningObjective] = useState('');
+  const [preferredFormat, setPreferredFormat] = useState<'Online' | 'In-Person'>('Online');
 
   useEffect(() => {
     fetchTutor();
@@ -71,6 +74,9 @@ export default function RequestCustomSessionScreen() {
         duration: parseFloat(duration),
         description,
         estimatedBudget: parseFloat(estimatedBudget),
+        academicLevel,
+        learningObjective,
+        preferredFormat,
       });
 
       router.push({
@@ -179,6 +185,41 @@ export default function RequestCustomSessionScreen() {
           </View>
 
           <View style={styles.formSection}>
+            <Text style={styles.label}>Academic Level</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., 2nd Year Undergraduate"
+              value={academicLevel}
+              onChangeText={setAcademicLevel}
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.label}>Preferred Format</Text>
+            <View style={styles.formatRow}>
+              {(['Online', 'In-Person'] as const).map((f) => (
+                <TouchableOpacity
+                  key={f}
+                  style={[styles.formatOption, preferredFormat === f && styles.formatOptionActive]}
+                  onPress={() => setPreferredFormat(f)}
+                >
+                  <Text style={[styles.formatOptionText, preferredFormat === f && styles.formatOptionTextActive]}>{f}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.label}>Learning Objective</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., Prepare for mid-term assessment"
+              value={learningObjective}
+              onChangeText={setLearningObjective}
+            />
+          </View>
+
+          <View style={styles.formSection}>
             <Text style={styles.label}>Describe what you need help with</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
@@ -221,6 +262,31 @@ export default function RequestCustomSessionScreen() {
 }
 
 const styles = StyleSheet.create({
+  formatRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  formatOption: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  formatOptionActive: {
+    borderColor: '#008C91',
+    backgroundColor: '#E1F4EF',
+  },
+  formatOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  formatOptionTextActive: {
+    color: '#008C91',
+  },
   safe: {
     flex: 1,
     backgroundColor: '#F5F6FA',

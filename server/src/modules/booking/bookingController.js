@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 const Booking = require('./Booking');
+const User = require('../auth/User');
+const {
+  ensureSessionForBooking,
+  syncSessionSchedule,
+  cancelSessionForBooking,
+} = require('../../shared/bookingSessionSync');
 
 const DURATIONS = [30, 60, 90, 120];
 const MEETING_TYPES = ['Microsoft Teams', 'In-Person Study'];
@@ -62,27 +68,39 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: 'Tutor details are required' });
     }
 
-    const hourlyRate = Number(tutor.hourlyRate);
-    if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
-      return res.status(400).json({ message: 'A valid tutor hourly rate is required' });
-    }
-
+    let hourlyRate = Number(tutor.hourlyRate);
     let tutorUserId = null;
+    let tutorAccount = null;
     if (tutor.userId) {
       if (!mongoose.isValidObjectId(tutor.userId)) {
         return res.status(400).json({ message: 'Tutor account ID is invalid' });
       }
-      tutorUserId = tutor.userId;
+      tutorAccount = await User.findOne({ _id: tutor.userId, role: 'tutor' });
+      if (!tutorAccount) {
+        return res.status(400).json({ message: 'Tutor account not found' });
+      }
+      tutorUserId = tutorAccount._id;
+      // Use the tutor's real rate when they have set one
+      if (tutorAccount.hourlyRate > 0) hourlyRate = tutorAccount.hourlyRate;
     }
+    if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
+      return res.status(400).json({ message: 'A valid tutor hourly rate is required' });
+    }
+    const clientSubtitle = typeof tutor.subtitle === 'string' ? tutor.subtitle.trim() : '';
+    const tutorName = tutorAccount ? tutorAccount.name : tutor.name.trim();
+    const tutorSubtitle = tutorAccount ? (tutorAccount.subjects?.[0] || clientSubtitle) : clientSubtitle;
+    const tutorInitials = tutorAccount
+      ? tutorAccount.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+      : (typeof tutor.initials === 'string' ? tutor.initials.trim() : '');
 
     const sessionFee = Math.round(hourlyRate * Number(durationMinutes) / 60);
     const booking = await Booking.create({
       student: req.user._id,
       tutor: {
         userId: tutorUserId,
-        name: tutor.name.trim(),
-        subtitle: typeof tutor.subtitle === 'string' ? tutor.subtitle.trim() : '',
-        initials: typeof tutor.initials === 'string' ? tutor.initials.trim() : '',
+        name: tutorName,
+        subtitle: tutorSubtitle,
+        initials: tutorInitials,
         rating: Number.isFinite(Number(tutor.rating)) ? Number(tutor.rating) : 0,
         reviewCount: Number.isFinite(Number(tutor.reviewCount)) ? Number(tutor.reviewCount) : 0,
         hourlyRate,
@@ -94,6 +112,9 @@ exports.createBooking = async (req, res) => {
       message: message.trim(),
       fees: { session: sessionFee, platform: 0, total: sessionFee },
       status: 'pending',
+      subject: typeof req.body.subject === 'string' && req.body.subject.trim()
+        ? req.body.subject.trim()
+        : tutorSubtitle,
     });
 
     return res.status(201).json({
@@ -129,8 +150,11 @@ exports.cancelBooking = async (req, res) => {
     }
 
     booking.status = 'cancelled';
+    booking.cancelledBy = 'student';
     booking.cancellationReason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 500) : '';
+    if (booking.rescheduleRequest?.status === 'pending') booking.rescheduleRequest.status = 'withdrawn';
     await booking.save();
+    await cancelSessionForBooking(booking);
     return res.json({ message: 'Booking cancelled', booking });
   } catch (err) {
     return res.status(500).json({ message: 'Could not cancel booking', error: err.message });
@@ -173,7 +197,9 @@ exports.rescheduleBooking = async (req, res) => {
     booking.rescheduleReason = reason.trim();
     const fee = Math.round(booking.tutor.hourlyRate * booking.durationMinutes / 60);
     booking.fees = { session: fee, platform: 0, total: fee };
+    if (booking.rescheduleRequest?.status === 'pending') booking.rescheduleRequest.status = 'withdrawn';
     await booking.save();
+    await syncSessionSchedule(booking);
     return res.json({ message: 'Booking rescheduled', booking });
   } catch (err) {
     return res.status(500).json({ message: 'Could not reschedule booking', error: err.message });
@@ -195,6 +221,7 @@ exports.acceptBooking = async (req, res) => {
     }
     booking.status = 'confirmed';
     await booking.save();
+    await ensureSessionForBooking(booking);
     return res.json({ message: 'Booking accepted', booking });
   } catch (err) {
     return res.status(500).json({ message: 'Could not accept booking', error: err.message });
@@ -215,10 +242,62 @@ exports.rejectBooking = async (req, res) => {
       return res.status(400).json({ message: 'Booking is not pending' });
     }
     booking.status = 'cancelled';
+    booking.cancelledBy = 'tutor';
     booking.cancellationReason = typeof req.body?.reason === 'string' ? req.body.reason.trim().slice(0, 500) : 'Rejected by tutor';
     await booking.save();
     return res.json({ message: 'Booking rejected', booking });
   } catch (err) {
     return res.status(500).json({ message: 'Could not reject booking', error: err.message });
+  }
+};
+
+// Student approves or rejects a new time proposed by the tutor.
+// The booking keeps its original time until it is approved here.
+exports.respondToReschedule = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Booking ID is invalid' });
+    }
+    const approve = req.body?.approve === true;
+    const booking = await Booking.findOne({ _id: req.params.id, student: req.user._id });
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    const proposal = booking.rescheduleRequest;
+    if (!proposal || proposal.status !== 'pending') {
+      return res.status(400).json({ message: 'There is no pending reschedule request' });
+    }
+    if (!['pending', 'confirmed'].includes(booking.status)) {
+      return res.status(400).json({ message: 'This booking can no longer be rescheduled' });
+    }
+
+    proposal.respondedAt = new Date();
+    if (!approve) {
+      proposal.status = 'rejected';
+      await booking.save();
+      return res.json({ message: 'Reschedule request declined', booking });
+    }
+
+    // Make sure the tutor has not filled the slot in the meantime
+    const clash = await Booking.findOne({
+      _id: { $ne: booking._id },
+      'tutor.userId': booking.tutor.userId,
+      status: 'confirmed',
+      sessionDate: proposal.sessionDate,
+      startTime: proposal.startTime,
+    });
+    if (clash) {
+      return res.status(409).json({ message: 'That time is no longer available' });
+    }
+
+    proposal.status = 'approved';
+    booking.sessionDate = proposal.sessionDate;
+    booking.startTime = proposal.startTime;
+    booking.rescheduleReason = proposal.reason;
+    if (booking.status === 'pending') booking.status = 'confirmed';
+    await booking.save();
+    await ensureSessionForBooking(booking);
+    await syncSessionSchedule(booking);
+    return res.json({ message: 'Reschedule approved', booking });
+  } catch (err) {
+    return res.status(500).json({ message: 'Could not respond to reschedule', error: err.message });
   }
 };

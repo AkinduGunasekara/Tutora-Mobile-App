@@ -2,6 +2,8 @@ import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useAuth } from '@/context/AuthContext';
+
 const TEAL  = '#008C91';
 const MUTED = '#78809A';
 const PAGE  = '#EFEDDC';
@@ -27,8 +29,19 @@ function TabIcon({
 }
 
 export default function TabsLayout() {
+  const { user, loading } = useAuth();
+  const isTutor = user?.role === 'tutor';
+  // Tabs shown only to one role; the other role gets href: null (hidden, still routable)
+  const studentTab = isTutor ? null : undefined;
+  const tutorTab = isTutor ? undefined : null;
+
+  // Wait for the saved session so the navigator is created with the right role
+  if (loading) return null;
+
   return (
     <Tabs
+      // Tutors go back through their screen history; students keep the default behaviour
+      backBehavior={isTutor ? 'history' : 'firstRoute'}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor:   TEAL,
@@ -47,10 +60,22 @@ export default function TabsLayout() {
         },
       }}>
 
+      {/* ── Visible tabs: students and tutors each see five ── */}
       <Tabs.Screen
         name="home"
         options={{
           title: 'Home',
+          href: studentTab,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="home-outline" nameFocused="home" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tutor/dashboard"
+        options={{
+          title: 'Home',
+          href: tutorTab,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="home-outline" nameFocused="home" focused={focused} />
           ),
@@ -60,6 +85,7 @@ export default function TabsLayout() {
         name="search"
         options={{
           title: 'Search',
+          href: studentTab,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="search-outline" nameFocused="search" focused={focused} />
           ),
@@ -69,8 +95,29 @@ export default function TabsLayout() {
         name="bookings"
         options={{
           title: 'Calendar',
+          href: studentTab,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="calendar-outline" nameFocused="calendar" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tutor/calendar"
+        options={{
+          title: 'Calendar',
+          href: tutorTab,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="calendar-outline" nameFocused="calendar" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tutor/requests"
+        options={{
+          title: 'Requests',
+          href: tutorTab,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="cube-outline" nameFocused="cube" focused={focused} />
           ),
         }}
       />
@@ -78,6 +125,17 @@ export default function TabsLayout() {
         name="chat"
         options={{
           title: 'Messages',
+          href: studentTab,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="chatbubble-outline" nameFocused="chatbubble" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tutor/messages"
+        options={{
+          title: 'Messages',
+          href: tutorTab,
           tabBarIcon: ({ focused }) => (
             <TabIcon name="chatbubble-outline" nameFocused="chatbubble" focused={focused} />
           ),
@@ -92,6 +150,15 @@ export default function TabsLayout() {
           ),
         }}
       />
+
+      {/* ── Tutor module screens (IT23722286) ── */}
+      <Tabs.Screen name="tutor/request-details"    options={{ href: null }} />
+      <Tabs.Screen name="tutor/session-details"    options={{ href: null }} />
+      <Tabs.Screen name="tutor/reschedule"         options={{ href: null }} />
+      <Tabs.Screen name="tutor/availability"       options={{ href: null }} />
+      <Tabs.Screen name="tutor/payments"           options={{ href: null }} />
+      <Tabs.Screen name="tutor/reviews"            options={{ href: null }} />
+      <Tabs.Screen name="tutor/chat"               options={{ href: null }} />
 
       {/* ── Booking module screens (IT23730656) ── */}
       <Tabs.Screen name="explore"                  options={{ href: null }} />

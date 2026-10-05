@@ -75,7 +75,7 @@ export default function TutorProfileScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#008C91" />
+          <ActivityIndicator size="large" color="#006666" />
         </View>
       </SafeAreaView>
     );
@@ -96,13 +96,11 @@ export default function TutorProfileScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/search')}>
             <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Tutor Profile</Text>
-          <TouchableOpacity>
-            <Ionicons name="share-outline" size={24} color="#1A1A2E" />
-          </TouchableOpacity>
+          <View style={{ width: 24 }} />
         </View>
 
         {/* Profile Info */}
@@ -119,7 +117,7 @@ export default function TutorProfileScreen() {
             )}
             {tutor.isVerified && (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark-circle" size={20} color="#008C91" />
+                <Ionicons name="checkmark-circle" size={20} color="#006666" />
               </View>
             )}
           </View>
@@ -202,13 +200,13 @@ export default function TutorProfileScreen() {
           <View style={styles.modesContainer}>
             {tutor.onlineSessions && (
               <View style={styles.modeItem}>
-                <Ionicons name="globe-outline" size={20} color="#008C91" />
+                <Ionicons name="globe-outline" size={20} color="#006666" />
                 <Text style={styles.modeText}>Online Sessions</Text>
               </View>
             )}
             {tutor.faceToFaceSessions && (
               <View style={styles.modeItem}>
-                <Ionicons name="person-outline" size={20} color="#008C91" />
+                <Ionicons name="person-outline" size={20} color="#006666" />
                 <Text style={styles.modeText}>In-person Sessions</Text>
               </View>
             )}
@@ -287,7 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 48,
   },
   avatarPlaceholder: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -311,7 +309,7 @@ const styles = StyleSheet.create({
   },
   tutorTitle: {
     fontSize: 14,
-    color: '#008C91',
+    color: '#006666',
     fontWeight: '600',
     marginBottom: 16,
   },
@@ -392,7 +390,7 @@ const styles = StyleSheet.create({
   },
   subjectTagText: {
     fontSize: 13,
-    color: '#008C91',
+    color: '#006666',
     fontWeight: '600',
   },
   qualificationItem: {
@@ -414,7 +412,7 @@ const styles = StyleSheet.create({
   feeAmount: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#008C91',
+    color: '#006666',
   },
   feePeriod: {
     fontSize: 14,
@@ -441,7 +439,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   primaryButton: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -460,7 +458,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   secondaryButtonText: {
-    color: '#008C91',
+    color: '#006666',
     fontSize: 16,
     fontWeight: '700',
   },

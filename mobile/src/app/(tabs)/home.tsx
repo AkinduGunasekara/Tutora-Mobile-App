@@ -129,11 +129,13 @@ export default function HomeScreen() {
         <View>
           <Text style={styles.logoText}>TUTORA</Text>
         </View>
-        <View style={styles.headerRight}>
+        <Pressable
+          style={styles.headerRight}
+          onPress={() => router.push('/(tabs)/profile' as any)}>
           <View style={styles.headerAvatar}>
             <Text style={styles.headerAvatarText}>{getInitials(user.name)}</Text>
           </View>
-        </View>
+        </Pressable>
       </View>
 
       <ScrollView
@@ -176,18 +178,23 @@ export default function HomeScreen() {
           </Pressable>
         )}
 
-        {/* ── Popular Subjects ──────────────────────────────── */}
+        {/* ── Browse by Subject ──────────────────────────────── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>POPULAR SUBJECTS</Text>
-            <Pressable><Text style={styles.seeAll}>See All</Text></Pressable>
+            <Text style={styles.sectionLabel}>BROWSE BY SUBJECT</Text>
           </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.subjectsRow}>
             {SUBJECTS.map((s) => (
-              <Pressable key={s.name} style={styles.subjectChip}>
+              <Pressable
+                key={s.name}
+                style={styles.subjectChip}
+                onPress={() => router.push({
+                  pathname: '/(tabs)/search' as any,
+                  params: { subject: s.name },
+                })}>
                 <Text style={styles.subjectName}>{s.name}</Text>
               </Pressable>
             ))}

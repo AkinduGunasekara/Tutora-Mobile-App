@@ -92,16 +92,18 @@ export default function BookingConfirmedScreen() {
           <View style={styles.actions}>
             <Pressable
               accessibilityRole="button"
-              onPress={() => router.push({ pathname: '/(tabs)/bookings', params: { date: asText(params.date, '') } })}
+              onPress={() => router.replace({ pathname: '/(tabs)/bookings' as any, params: { date: asText(params.date, '') } })}
               style={({ pressed }) => [styles.calendarButton, pressed && styles.pressed]}>
               <Text style={styles.primaryButtonText}>View My Calendar</Text>
             </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.replace('/(tabs)/bookings' as any)}
-              style={({ pressed }) => [styles.homeButton, pressed && styles.pressed]}>
-              <Text style={styles.homeButtonText}>{wasRescheduled ? 'Back to Home' : 'View My Bookings'}</Text>
-            </Pressable>
+            {wasRescheduled && (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.replace('/(tabs)/home' as any)}
+                style={({ pressed }) => [styles.homeButton, pressed && styles.pressed]}>
+                <Text style={styles.homeButtonText}>Back to Home</Text>
+              </Pressable>
+            )}
           </View>
         </ScrollView>
       </View>

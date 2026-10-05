@@ -77,7 +77,7 @@ export default function TutorReviewsScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#008C91" />
+          <ActivityIndicator size="large" color="#006666" />
         </View>
       </SafeAreaView>
     );
@@ -86,7 +86,7 @@ export default function TutorReviewsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push(`/tutor-profile?id=${tutorId}`)}>
           <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Ratings & Reviews</Text>
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   avatarPlaceholder: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   reviewTagText: {
     fontSize: 11,
-    color: '#008C91',
+    color: '#006666',
     fontWeight: '600',
   },
   noReviews: {

@@ -74,7 +74,7 @@ export default function RequestCustomSessionScreen() {
       });
 
       router.push({
-        pathname: '/request-sent',
+        pathname: '/(tabs)/request-sent',
         params: {
           tutorName: tutor?.name,
           subject,
@@ -96,7 +96,7 @@ export default function RequestCustomSessionScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#008C91" />
+          <ActivityIndicator size="large" color="#006666" />
         </View>
       </SafeAreaView>
     );
@@ -105,7 +105,7 @@ export default function RequestCustomSessionScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push(`/tutor-profile?id=${tutorId}`)}>
           <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Request Custom Session</Text>
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   avatarPlaceholder: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
   },
   submitButton: {
-    backgroundColor: '#008C91',
+    backgroundColor: '#006666',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

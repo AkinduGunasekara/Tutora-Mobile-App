@@ -36,6 +36,7 @@ const durationFromMinutes = (value?: string | string[]) => {
 
 export default function ScheduleScreen() {
   const tutorParams = useLocalSearchParams<{
+    tutorId?: string;
     tutorName?: string;
     tutorSubtitle?: string;
     rating?: string;
@@ -93,6 +94,7 @@ export default function ScheduleScreen() {
       params: {
         date: dateParam,
         dateLabel: selectedLabel,
+        tutorId: tutorParams.tutorId,
         time,
         duration,
         tutorName: tutorParams.tutorName,

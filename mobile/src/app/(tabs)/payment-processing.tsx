@@ -60,10 +60,10 @@ export default function PaymentProcessingScreen() {
     const t2 = setTimeout(() => setStep(2), 2000);
 
     const run = async () => {
-      let resolvedSessionId = `mock-${Date.now()}`;
+      // Simulated payment: no gateway, but the session's payment state is persisted
       try {
         const { data: session } = await api.post('/session', {
-          bookingId:     params.bookingId    || 'mock-booking',
+          bookingId:     params.bookingId,
           tutorId:       params.tutorId,
           subject:       params.subject,
           durationHours: params.durationHours,
@@ -71,11 +71,13 @@ export default function PaymentProcessingScreen() {
           scheduledDate: params.scheduledDate || new Date().toISOString(),
           paymentMethod: params.paymentMethod || 'card',
         });
-        resolvedSessionId = session._id;
-        sessionIdRef.current = resolvedSessionId;
-        await api.patch(`/session/${resolvedSessionId}/confirm-payment`).catch(() => {});
-      } catch {
-        sessionIdRef.current = resolvedSessionId;
+        sessionIdRef.current = session._id;
+        await api.patch(`/session/${session._id}/confirm-payment`);
+      } catch (err: any) {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        setError(err?.response?.data?.message ?? 'We could not process this payment. Please try again.');
+        return;
       }
 
       setTimeout(() => {

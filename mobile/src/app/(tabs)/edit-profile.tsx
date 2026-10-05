@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -87,6 +88,10 @@ export default function EditProfileScreen() {
   const [studentId, setStudentId] = useState(user?.studentId ?? '');
   const [bio, setBio] = useState(user?.bio ?? '');
   const [hourlyRate, setHourlyRate] = useState(String(user?.hourlyRate ?? ''));
+  const [subjects, setSubjects] = useState((user?.subjects ?? []).join(', '));
+  const [qualifications, setQualifications] = useState((user?.qualifications ?? []).join('\n'));
+  const [onlineSessions, setOnlineSessions] = useState(user?.onlineSessions ?? true);
+  const [faceToFaceSessions, setFaceToFaceSessions] = useState(user?.faceToFaceSessions ?? false);
 
   const initials = name
     .split(' ')
@@ -113,6 +118,10 @@ export default function EditProfileScreen() {
       } else {
         payload.bio = bio;
         payload.hourlyRate = hourlyRate ? Number(hourlyRate) : 0;
+        payload.subjects = subjects.split(',').map((x) => x.trim()).filter(Boolean);
+        payload.qualifications = qualifications.split('\n').map((x) => x.trim()).filter(Boolean);
+        payload.onlineSessions = onlineSessions;
+        payload.faceToFaceSessions = faceToFaceSessions;
       }
       const { data } = await api.put('/auth/profile', payload);
       updateUser(data);
@@ -286,6 +295,36 @@ export default function EditProfileScreen() {
                   keyboardType="numeric"
                   placeholder="e.g. 2500"
                 />
+                <View style={styles.fieldDivider} />
+                <Field
+                  label="Subjects I Teach (comma separated)"
+                  icon="📚"
+                  value={subjects}
+                  onChangeText={setSubjects}
+                  placeholder="e.g. Programming, Algorithms"
+                  keyboardType="default"
+                />
+                <View style={styles.fieldDivider} />
+                <Field
+                  label="Qualifications & Experience (one per line)"
+                  icon="🎓"
+                  value={qualifications}
+                  onChangeText={setQualifications}
+                  placeholder={'e.g. BSc Software Engineering\n2+ Years Tutoring Experience'}
+                  multiline
+                  inputHeight={88}
+                  keyboardType="default"
+                />
+                <View style={styles.fieldDivider} />
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>Online Sessions</Text>
+                  <Switch value={onlineSessions} onValueChange={setOnlineSessions} trackColor={{ false: '#E4E1D2', true: '#008C91' }} thumbColor="#FFFFFF" />
+                </View>
+                <View style={styles.fieldDivider} />
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>Face-to-Face Sessions</Text>
+                  <Switch value={faceToFaceSessions} onValueChange={setFaceToFaceSessions} trackColor={{ false: '#E4E1D2', true: '#008C91' }} thumbColor="#FFFFFF" />
+                </View>
               </View>
             </View>
           )}
@@ -317,6 +356,8 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
+  toggleLabel: { fontSize: 14, fontWeight: '600', color: '#171943' },
   safe: { flex: 1, backgroundColor: '#F5F6FA' },
   scroll: {
     padding: Spacing.four,

@@ -46,6 +46,7 @@ export default function BookingSummaryScreen() {
     duration?: string;
     meetingType?: string;
     message?: string;
+    tutorId?: string;
     tutorName?: string;
     tutorSubtitle?: string;
     rating?: string;
@@ -100,6 +101,7 @@ export default function BookingSummaryScreen() {
         : await api.post('/bookings', {
           ...bookingPayload,
           tutor: {
+            userId: asText(params.tutorId, '') || undefined,
             name: tutorName,
             subtitle: tutorSubtitle,
             initials: tutorInitials,

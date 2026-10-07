@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
@@ -22,12 +23,11 @@ const TEAL  = '#008C91';
 const MUTED = '#78809A';
 const CARD  = '#FFFFFF';
 
-type PaymentMethod = 'card' | 'bank_transfer' | 'wallet';
+type PaymentMethod = 'card' | 'bank_transfer';
 
 const METHODS: { id: PaymentMethod; label: string; sub: string }[] = [
-  { id: 'card',          label: 'Card Payment',   sub: 'Visa / Mastercard / Amex' },
-  { id: 'bank_transfer', label: 'Bank Transfer',  sub: 'Direct bank deposit' },
-  { id: 'wallet',        label: 'Wallet Balance', sub: 'Instant deduction' },
+  { id: 'card',          label: 'Debit / Credit Card', sub: 'Visa · Mastercard · Amex' },
+  { id: 'bank_transfer', label: 'Bank Transfer',       sub: 'Direct bank deposit + slip' },
 ];
 
 const BANK_DETAILS = [
@@ -58,6 +58,18 @@ function DetailRow({ label, value, muted }: { label: string; value: string; mute
   );
 }
 
+// Formats as 4-digit groups: 4111 1111 1111 1111
+function formatCardNumber(raw: string) {
+  return raw.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+}
+
+// Formats as MM/YY
+function formatExpiry(raw: string) {
+  const digits = raw.replace(/\D/g, '').slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
+
 export default function PaymentSummaryScreen() {
   const params = useLocalSearchParams<{
     bookingId: string;
@@ -75,11 +87,20 @@ export default function PaymentSummaryScreen() {
   const fee      = Math.round(subtotal * 0.05 * 100) / 100;
   const total    = subtotal + fee;
 
-  const [method,     setMethod]     = useState<PaymentMethod>('card');
-  const [slipUri,    setSlipUri]    = useState('');
-  const [slipName,   setSlipName]   = useState('');
-  const [reference,  setReference]  = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [method,      setMethod]      = useState<PaymentMethod>('card');
+
+  // Card fields
+  const [cardNumber,  setCardNumber]  = useState('');
+  const [cardExpiry,  setCardExpiry]  = useState('');
+  const [cardCVV,     setCardCVV]     = useState('');
+  const [cardName,    setCardName]    = useState('');
+
+  // Bank transfer fields
+  const [slipUri,     setSlipUri]     = useState('');
+  const [slipName,    setSlipName]    = useState('');
+  const [reference,   setReference]   = useState('');
+
+  const [submitting,  setSubmitting]  = useState(false);
 
   const isBankTransfer = method === 'bank_transfer';
   const slipUploaded   = slipUri !== '';
@@ -93,11 +114,11 @@ export default function PaymentSummaryScreen() {
   const handlePickSlip = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow access to your photo library to upload a slip.');
+      Alert.alert('Permission needed', 'Please allow access to your photo library.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: false,
       quality: 0.8,
     });
@@ -108,6 +129,30 @@ export default function PaymentSummaryScreen() {
   };
 
   const handleProceed = async () => {
+    if (isBankTransfer && !slipUploaded) {
+      Alert.alert('Slip required', 'Please upload your bank transfer slip before proceeding.');
+      return;
+    }
+    if (!isBankTransfer) {
+      const digits = cardNumber.replace(/\s/g, '');
+      if (digits.length < 13) {
+        Alert.alert('Invalid card', 'Please enter a valid card number.');
+        return;
+      }
+      if (cardExpiry.length < 5) {
+        Alert.alert('Invalid card', 'Please enter an expiry date (MM/YY).');
+        return;
+      }
+      if (cardCVV.length < 3) {
+        Alert.alert('Invalid card', 'Please enter a 3-digit CVV.');
+        return;
+      }
+      if (!cardName.trim()) {
+        Alert.alert('Invalid card', 'Please enter the name on your card.');
+        return;
+      }
+    }
+
     const sharedParams = {
       bookingId:     params.bookingId,
       tutorId:       params.tutorId,
@@ -120,10 +165,6 @@ export default function PaymentSummaryScreen() {
     };
 
     if (isBankTransfer) {
-      if (!slipUploaded) {
-        Alert.alert('Slip required', 'Please upload your bank transfer slip before proceeding.');
-        return;
-      }
       setSubmitting(true);
       try {
         const { data: payment } = await api.post('/payment', {
@@ -146,14 +187,12 @@ export default function PaymentSummaryScreen() {
     }
   };
 
-  const canProceed = !isBankTransfer || slipUploaded;
-
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.backIcon}>{'<'}</Text>
+          <Ionicons name="chevron-back" size={22} color={INK} />
         </Pressable>
         <Text style={styles.headerTitle}>Payment Summary</Text>
         <View style={{ width: 24 }} />
@@ -217,10 +256,73 @@ export default function PaymentSummaryScreen() {
           ))}
         </View>
 
-        {/* ── Bank Transfer fields — shown inline when selected ── */}
+        {/* ── Card fields ── */}
+        {!isBankTransfer && (
+          <View style={styles.card}>
+            <Text style={styles.sectionLabel}>CARD DETAILS</Text>
+
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>Card Number</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="4111 1111 1111 1111"
+                placeholderTextColor={MUTED}
+                value={cardNumber}
+                onChangeText={(t) => setCardNumber(formatCardNumber(t))}
+                keyboardType="numeric"
+                maxLength={19}
+              />
+            </View>
+
+            <View style={styles.fieldRow}>
+              <View style={[styles.fieldGroup, { flex: 1 }]}>
+                <Text style={styles.fieldLabel}>Expiry Date</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM/YY"
+                  placeholderTextColor={MUTED}
+                  value={cardExpiry}
+                  onChangeText={(t) => setCardExpiry(formatExpiry(t))}
+                  keyboardType="numeric"
+                  maxLength={5}
+                />
+              </View>
+              <View style={[styles.fieldGroup, { flex: 1 }]}>
+                <Text style={styles.fieldLabel}>CVV</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="123"
+                  placeholderTextColor={MUTED}
+                  value={cardCVV}
+                  onChangeText={(t) => setCardCVV(t.replace(/\D/g, '').slice(0, 4))}
+                  keyboardType="numeric"
+                  secureTextEntry
+                  maxLength={4}
+                />
+              </View>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>Name on Card</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. JOHN SILVA"
+                placeholderTextColor={MUTED}
+                value={cardName}
+                onChangeText={setCardName}
+                autoCapitalize="characters"
+              />
+            </View>
+
+            <View style={styles.secureNote}>
+              <Text style={styles.secureNoteText}>Your card details are encrypted and secure</Text>
+            </View>
+          </View>
+        )}
+
+        {/* ── Bank Transfer fields ── */}
         {isBankTransfer && (
           <>
-            {/* Bank account details */}
             <View style={styles.card}>
               <Text style={styles.sectionLabel}>BANK ACCOUNT DETAILS</Text>
               {BANK_DETAILS.map((row) => (
@@ -236,7 +338,6 @@ export default function PaymentSummaryScreen() {
               </View>
             </View>
 
-            {/* How it works */}
             <View style={styles.card}>
               <Text style={styles.sectionLabel}>HOW IT WORKS</Text>
               {HOW_IT_WORKS.map((text, i) => (
@@ -249,10 +350,8 @@ export default function PaymentSummaryScreen() {
               ))}
             </View>
 
-            {/* Upload slip */}
             <View style={styles.card}>
               <Text style={styles.sectionLabel}>UPLOAD PAYMENT SLIP</Text>
-
               <Pressable
                 style={[styles.uploadZone, slipUploaded && styles.uploadZoneDone]}
                 onPress={handlePickSlip}>
@@ -273,15 +372,17 @@ export default function PaymentSummaryScreen() {
                 )}
               </Pressable>
 
-              <Text style={styles.fieldLabel}>Transaction Reference / ID (optional)</Text>
-              <TextInput
-                style={styles.referenceInput}
-                placeholder="e.g. TXN-20261001-00123"
-                placeholderTextColor={MUTED}
-                value={reference}
-                onChangeText={setReference}
-                autoCapitalize="characters"
-              />
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Transaction Reference / ID (optional)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. TXN-20261001-00123"
+                  placeholderTextColor={MUTED}
+                  value={reference}
+                  onChangeText={setReference}
+                  autoCapitalize="characters"
+                />
+              </View>
             </View>
           </>
         )}
@@ -295,15 +396,15 @@ export default function PaymentSummaryScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.proceedBtn,
-            (!canProceed || submitting) && { opacity: 0.45 },
-            canProceed && !submitting && pressed && { opacity: 0.85 },
+            (submitting) && { opacity: 0.45 },
+            !submitting && pressed && { opacity: 0.85 },
           ]}
           onPress={handleProceed}
-          disabled={!canProceed || submitting}>
+          disabled={submitting}>
           {submitting
             ? <ActivityIndicator color="#fff" />
             : <Text style={styles.proceedBtnText}>
-                {isBankTransfer ? 'Submit & Proceed' : 'Proceed to Pay'}
+                {isBankTransfer ? 'Submit & Proceed' : 'Pay Now'}
               </Text>
           }
         </Pressable>
@@ -378,6 +479,26 @@ const styles = StyleSheet.create({
   radioActive: { borderColor: TEAL },
   radioDot:    { width: 9, height: 9, borderRadius: 5, backgroundColor: TEAL },
 
+  // Card fields
+  fieldGroup: { gap: 5 },
+  fieldRow:   { flexDirection: 'row', gap: 12 },
+  fieldLabel: {
+    fontSize: 10, fontWeight: '700', color: MUTED,
+    letterSpacing: 0.6, textTransform: 'uppercase',
+  },
+  input: {
+    backgroundColor: PAGE, borderRadius: 10,
+    borderWidth: 1.5, borderColor: '#E4E1D2',
+    paddingHorizontal: 13, paddingVertical: 11,
+    fontSize: 14, color: INK,
+    letterSpacing: 0.5,
+  },
+  secureNote: {
+    backgroundColor: '#E1F4EF', borderRadius: 8,
+    paddingVertical: 8, paddingHorizontal: 12, alignItems: 'center',
+  },
+  secureNoteText: { fontSize: 11, color: TEAL, fontWeight: '600' },
+
   // Bank transfer
   bankRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -414,17 +535,6 @@ const styles = StyleSheet.create({
   slipPreview:    { width: 120, height: 80, borderRadius: 8 },
   slipName:       { fontSize: 11, fontWeight: '700', color: INK, maxWidth: 240, textAlign: 'center' },
   uploadChange:   { fontSize: 11, color: TEAL, fontWeight: '600' },
-
-  fieldLabel: {
-    fontSize: 10, fontWeight: '700', color: MUTED,
-    letterSpacing: 0.6, textTransform: 'uppercase',
-  },
-  referenceInput: {
-    backgroundColor: PAGE, borderRadius: 8,
-    borderWidth: 1, borderColor: '#E4E1D2',
-    paddingHorizontal: 12, paddingVertical: 10,
-    fontSize: 13, color: INK,
-  },
 
   escrowNote: {
     backgroundColor: '#E1F4EF', borderRadius: 10,

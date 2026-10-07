@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   TextInput,
 } from 'react-native';
@@ -11,6 +11,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import api from '@/lib/api';
+
+const PAGE = '#EFEDDC';
+const INK = '#171943';
+const TEAL = '#008C91';
+const MUTED = '#78809A';
+const CARD = '#FFFFFF';
 
 export default function TutorFiltersScreen() {
   const router = useRouter();
@@ -60,25 +66,25 @@ export default function TutorFiltersScreen() {
   };
 
   const RatingStar = ({ rating, current }: { rating: number; current: string }) => (
-    <TouchableOpacity onPress={() => setMinRating(rating.toString())}>
+    <Pressable onPress={() => setMinRating(rating.toString())} hitSlop={4}>
       <Ionicons
         name={rating <= parseInt(current) ? 'star' : 'star-outline'}
         size={28}
         color={rating <= parseInt(current) ? '#FFB800' : '#D1D5DB'}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
-        </TouchableOpacity>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <Ionicons name="chevron-back" size={22} color={INK} />
+        </Pressable>
         <Text style={styles.headerTitle}>Filter Tutors</Text>
-        <TouchableOpacity onPress={clearFilters}>
+        <Pressable onPress={clearFilters} hitSlop={8}>
           <Text style={styles.clearText}>Clear</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -89,13 +95,14 @@ export default function TutorFiltersScreen() {
             <TextInput
               style={styles.subjectInput}
               placeholder="Enter subject"
+              placeholderTextColor={MUTED}
               value={subject}
               onChangeText={setSubject}
             />
           </View>
           <View style={styles.popularSubjects}>
             {subjects.slice(0, 6).map((sub) => (
-              <TouchableOpacity
+              <Pressable
                 key={sub}
                 style={[
                   styles.subjectChip,
@@ -111,7 +118,7 @@ export default function TutorFiltersScreen() {
                 >
                   {sub}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -125,6 +132,7 @@ export default function TutorFiltersScreen() {
               <TextInput
                 style={styles.priceValue}
                 placeholder="0"
+                placeholderTextColor={MUTED}
                 value={minPrice}
                 onChangeText={setMinPrice}
                 keyboardType="numeric"
@@ -136,6 +144,7 @@ export default function TutorFiltersScreen() {
               <TextInput
                 style={styles.priceValue}
                 placeholder="5000"
+                placeholderTextColor={MUTED}
                 value={maxPrice}
                 onChangeText={setMaxPrice}
                 keyboardType="numeric"
@@ -162,7 +171,7 @@ export default function TutorFiltersScreen() {
           <Text style={styles.sectionTitle}>Availability</Text>
           <View style={styles.daysContainer}>
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-              <TouchableOpacity
+              <Pressable
                 key={day}
                 style={[
                   styles.dayChip,
@@ -178,7 +187,7 @@ export default function TutorFiltersScreen() {
                 >
                   {day}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -187,7 +196,7 @@ export default function TutorFiltersScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tutoring Mode</Text>
           <View style={styles.modeContainer}>
-            <TouchableOpacity
+            <Pressable
               style={[
                 styles.modeChip,
                 mode === 'online' && styles.modeChipActive,
@@ -197,7 +206,7 @@ export default function TutorFiltersScreen() {
               <Ionicons
                 name="globe-outline"
                 size={20}
-                color={mode === 'online' ? '#006666' : '#6B7280'}
+                color={mode === 'online' ? TEAL : MUTED}
               />
               <Text
                 style={[
@@ -207,8 +216,8 @@ export default function TutorFiltersScreen() {
               >
                 Online
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               style={[
                 styles.modeChip,
                 mode === 'in-person' && styles.modeChipActive,
@@ -218,7 +227,7 @@ export default function TutorFiltersScreen() {
               <Ionicons
                 name="person-outline"
                 size={20}
-                color={mode === 'in-person' ? '#006666' : '#6B7280'}
+                color={mode === 'in-person' ? TEAL : MUTED}
               />
               <Text
                 style={[
@@ -228,15 +237,15 @@ export default function TutorFiltersScreen() {
               >
                 In-person
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
-          <Text style={styles.applyButtonText}>Apply Filters</Text>
-        </TouchableOpacity>
+        <Pressable style={styles.applyButton} onPress={applyFilters}>
+          <Text style={styles.applyButtonText}>APPLY FILTERS</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -245,50 +254,67 @@ export default function TutorFiltersScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PAGE,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E4E1D2',
+    gap: 10,
+    backgroundColor: CARD,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 17,
+    fontWeight: '800',
+    color: INK,
+    flex: 1,
+    textAlign: 'center',
   },
   clearText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#006666',
+    color: TEAL,
+    width: 22,
+    textAlign: 'right',
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 16,
   },
   section: {
-    marginBottom: 28,
+    backgroundColor: CARD,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 14,
+    fontWeight: '800',
+    color: INK,
     marginBottom: 12,
   },
   subjectContainer: {
     marginBottom: 12,
   },
   subjectInput: {
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 16,
-    color: '#1A1A2E',
+    fontSize: 15,
+    color: INK,
+    borderWidth: 1,
+    borderColor: '#E4E1D2',
   },
   popularSubjects: {
     flexDirection: 'row',
@@ -296,24 +322,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   subjectChip: {
-    backgroundColor: '#F5F6FA',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: PAGE,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E4E1D2',
   },
   subjectChipActive: {
-    backgroundColor: '#E8F5F5',
-    borderColor: '#006666',
+    backgroundColor: '#E1F4EF',
+    borderColor: TEAL,
   },
   subjectChipText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: MUTED,
     fontWeight: '500',
   },
   subjectChipTextActive: {
-    color: '#006666',
+    color: TEAL,
     fontWeight: '600',
   },
   priceContainer: {
@@ -323,32 +349,34 @@ const styles = StyleSheet.create({
   },
   priceInput: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#E4E1D2',
   },
   priceLabel: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontSize: 11,
+    color: MUTED,
     marginBottom: 4,
   },
   priceValue: {
     fontSize: 16,
-    color: '#1A1A2E',
+    color: INK,
     fontWeight: '600',
   },
   priceSeparator: {
     fontSize: 18,
-    color: '#6B7280',
+    color: MUTED,
   },
   ratingContainer: {
     flexDirection: 'row',
     gap: 8,
   },
   ratingText: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: 13,
+    color: MUTED,
     marginTop: 8,
   },
   daysContainer: {
@@ -357,26 +385,26 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dayChip: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F5F6FA',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: PAGE,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E4E1D2',
   },
   dayChipActive: {
-    backgroundColor: '#006666',
-    borderColor: '#006666',
+    backgroundColor: TEAL,
+    borderColor: TEAL,
   },
   dayChipText: {
-    fontSize: 13,
-    color: '#6B7280',
+    fontSize: 12,
+    color: MUTED,
     fontWeight: '600',
   },
   dayChipTextActive: {
-    color: '#FFFFFF',
+    color: CARD,
   },
   modeContainer: {
     flexDirection: 'row',
@@ -388,39 +416,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E4E1D2',
   },
   modeChipActive: {
-    backgroundColor: '#E8F5F5',
-    borderColor: '#006666',
+    backgroundColor: '#E1F4EF',
+    borderColor: TEAL,
   },
   modeChipText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: MUTED,
     fontWeight: '600',
   },
   modeChipTextActive: {
-    color: '#006666',
+    color: TEAL,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderTopColor: '#E4E1D2',
+    backgroundColor: CARD,
   },
   applyButton: {
-    backgroundColor: '#006666',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   applyButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: CARD,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

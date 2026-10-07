@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   FlatList,
   ActivityIndicator,
   Image,
@@ -15,6 +15,12 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+
+const PAGE = '#EFEDDC';
+const INK = '#171943';
+const TEAL = '#008C91';
+const MUTED = '#78809A';
+const CARD = '#FFFFFF';
 
 interface Tutor {
   _id: string;
@@ -323,10 +329,9 @@ export default function SearchScreen() {
     const reviewCount = item.reviewCount ?? 0;
 
     return (
-      <TouchableOpacity
+      <Pressable
         style={styles.tutorCard}
         onPress={() => navigateToProfile(item._id)}
-        activeOpacity={0.8}
       >
         <View style={styles.tutorHeader}>
           <View style={styles.avatarContainer}>
@@ -348,7 +353,7 @@ export default function SearchScreen() {
                 <Ionicons
                   name="checkmark-circle"
                   size={16}
-                  color="#006666"
+                  color={TEAL}
                 />
               </View>
             )}
@@ -412,7 +417,7 @@ export default function SearchScreen() {
             </Text>
           )}
         </View>
-      </TouchableOpacity>
+      </Pressable>
     );
   };
 
@@ -425,7 +430,7 @@ export default function SearchScreen() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator
             size="large"
-            color="#006666"
+            color={TEAL}
           />
         </View>
       </SafeAreaView>
@@ -439,28 +444,28 @@ export default function SearchScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.searchBarContainer}>
-          <TouchableOpacity
+          <Pressable
             onPress={() => router.back()}
-            activeOpacity={0.7}
+            hitSlop={8}
           >
             <Ionicons
-              name="arrow-back"
-              size={24}
-              color="#1A1A2E"
+              name="chevron-back"
+              size={22}
+              color={INK}
             />
-          </TouchableOpacity>
+          </Pressable>
 
           <View style={styles.searchBar}>
             <Ionicons
               name="search"
               size={20}
-              color="#78809A"
+              color={MUTED}
             />
 
             <TextInput
               style={styles.searchInput}
               placeholder="Search tutors..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={MUTED}
               value={searchQuery}
               onChangeText={setSearchQuery}
               onSubmitEditing={handleSearch}
@@ -468,24 +473,24 @@ export default function SearchScreen() {
             />
           </View>
 
-          <TouchableOpacity
+          <Pressable
             style={styles.filterButton}
             onPress={navigateToFilters}
-            activeOpacity={0.7}
+            hitSlop={8}
           >
             <Ionicons
               name="options-outline"
-              size={24}
-              color="#006666"
+              size={22}
+              color={TEAL}
             />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         <View style={styles.noResultsContainer}>
           <Ionicons
             name="search-outline"
             size={64}
-            color="#D1D5DB"
+            color="#E4E1D2"
           />
 
           <Text style={styles.noResultsTitle}>
@@ -497,15 +502,14 @@ export default function SearchScreen() {
           </Text>
 
           {hasFilters && (
-            <TouchableOpacity
+            <Pressable
               style={styles.clearFiltersButton}
               onPress={clearFilters}
-              activeOpacity={0.8}
             >
               <Text style={styles.clearFiltersText}>
                 Clear Filters
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
 
           <View style={styles.popularSearches}>
@@ -520,52 +524,41 @@ export default function SearchScreen() {
                 'Physics',
                 'Linear Algebra',
               ].map((subject) => (
-                <TouchableOpacity
+                <Pressable
                   key={subject}
                   style={styles.popularTag}
                   onPress={() => handlePopularSearch(subject)}
-                  activeOpacity={0.7}
                 >
                   <Text style={styles.popularTagText}>
                     {subject}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
           </View>
 
           <View style={styles.noResultsActions}>
-            <TouchableOpacity
+            <Pressable
               style={styles.noResultsButton}
               onPress={() =>
                 router.push('/(tabs)/bookings')
               }
-              activeOpacity={0.8}
             >
               <Text style={styles.noResultsButtonText}>
-                View Calendar
+                VIEW CALENDAR
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
-              style={[
-                styles.noResultsButton,
-                styles.noResultsButtonSecondary,
-              ]}
+            <Pressable
+              style={styles.noResultsButtonSecondary}
               onPress={() =>
                 router.push('/(tabs)/home')
               }
-              activeOpacity={0.8}
             >
-              <Text
-                style={[
-                  styles.noResultsButtonText,
-                  styles.noResultsButtonTextSecondary,
-                ]}
-              >
-                Back to Home
+              <Text style={styles.noResultsButtonTextSecondary}>
+                BACK TO HOME
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </SafeAreaView>
@@ -578,28 +571,28 @@ export default function SearchScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.searchBarContainer}>
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.back()}
-          activeOpacity={0.7}
+          hitSlop={8}
         >
           <Ionicons
-            name="arrow-back"
-            size={24}
-            color="#1A1A2E"
+            name="chevron-back"
+            size={22}
+            color={INK}
           />
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={styles.searchBar}>
           <Ionicons
             name="search"
             size={20}
-            color="#78809A"
+            color={MUTED}
           />
 
           <TextInput
             style={styles.searchInput}
             placeholder="Search tutors..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={MUTED}
             value={searchQuery}
             onChangeText={setSearchQuery}
             onSubmitEditing={handleSearch}
@@ -607,17 +600,17 @@ export default function SearchScreen() {
           />
         </View>
 
-        <TouchableOpacity
+        <Pressable
           style={styles.filterButton}
           onPress={navigateToFilters}
-          activeOpacity={0.7}
+          hitSlop={8}
         >
           <Ionicons
             name="options-outline"
-            size={24}
-            color="#006666"
+            size={22}
+            color={TEAL}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <FlatList
@@ -641,13 +634,12 @@ export default function SearchScreen() {
                 contentContainerStyle={styles.topTutorsRow}
               >
                 {tutors.slice(0, 5).map((tutor) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={tutor._id}
                     style={styles.topTutorCard}
                     onPress={() =>
                       navigateToProfile(tutor._id)
                     }
-                    activeOpacity={0.8}
                   >
                     <View style={styles.topTutorAvatar}>
                       {tutor.avatar ? (
@@ -691,7 +683,7 @@ export default function SearchScreen() {
                     <Text style={styles.topTutorRate}>
                       Rs {tutor.hourlyRate}/hr
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </ScrollView>
             </View>
@@ -705,7 +697,7 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
   },
 
   searchBarContainer: {
@@ -713,30 +705,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     gap: 12,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: CARD,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E1D2',
   },
 
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PAGE,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 8,
+    borderWidth: 1,
+    borderColor: '#E4E1D2',
   },
 
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#1A1A2E',
+    fontSize: 15,
+    color: INK,
   },
 
   filterButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PAGE,
     borderRadius: 12,
     padding: 10,
+    borderWidth: 1,
+    borderColor: '#E4E1D2',
   },
 
   list: {
@@ -745,9 +743,11 @@ const styles = StyleSheet.create({
   },
 
   tutorCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -775,13 +775,13 @@ const styles = StyleSheet.create({
   },
 
   avatarPlaceholder: {
-    backgroundColor: '#006666',
+    backgroundColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   avatarText: {
-    color: '#FFFFFF',
+    color: CARD,
     fontSize: 18,
     fontWeight: '700',
   },
@@ -790,7 +790,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -4,
     right: -4,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     borderRadius: 10,
   },
 
@@ -800,14 +800,14 @@ const styles = StyleSheet.create({
   },
 
   tutorName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
   },
 
   tutorSubjects: {
     fontSize: 13,
-    color: '#6B7280',
+    color: MUTED,
     marginTop: 2,
   },
 
@@ -821,18 +821,18 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1A1A2E',
+    color: INK,
   },
 
   reviewCount: {
     fontSize: 12,
-    color: '#6B7280',
+    color: MUTED,
   },
 
   price: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#006666',
+    color: TEAL,
   },
 
   tutorFooter: {
@@ -848,7 +848,7 @@ const styles = StyleSheet.create({
   },
 
   tag: {
-    backgroundColor: '#E8F5F5',
+    backgroundColor: '#E1F4EF',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -857,7 +857,7 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#006666',
+    color: TEAL,
   },
 
   availableText: {
@@ -882,13 +882,13 @@ const styles = StyleSheet.create({
   noResultsTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
     marginTop: 16,
   },
 
   noResultsSubtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: MUTED,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -897,12 +897,12 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: '#006666',
-    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderRadius: 23,
   },
 
   clearFiltersText: {
-    color: '#FFFFFF',
+    color: CARD,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -913,10 +913,11 @@ const styles = StyleSheet.create({
   },
 
   popularTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6B7280',
+    fontSize: 11,
+    fontWeight: '700',
+    color: MUTED,
     marginBottom: 12,
+    letterSpacing: 1,
   },
 
   popularTags: {
@@ -926,17 +927,17 @@ const styles = StyleSheet.create({
   },
 
   popularTag: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E4E1D2',
   },
 
   popularTagText: {
     fontSize: 13,
-    color: '#1A1A2E',
+    color: INK,
     fontWeight: '500',
   },
 
@@ -947,26 +948,36 @@ const styles = StyleSheet.create({
   },
 
   noResultsButton: {
-    backgroundColor: '#006666',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
 
   noResultsButtonSecondary: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderWidth: 1.5,
+    borderColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
 
   noResultsButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: CARD,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 
   noResultsButtonTextSecondary: {
-    color: '#006666',
+    color: TEAL,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 
   topTutorsSection: {
@@ -974,32 +985,33 @@ const styles = StyleSheet.create({
   },
 
   sectionHeader: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 4,
     marginBottom: 12,
   },
 
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#6B7280',
+    color: MUTED,
     letterSpacing: 1,
   },
 
   topTutorsRow: {
-    paddingHorizontal: 16,
     gap: 12,
   },
 
   topTutorCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: CARD,
+    borderRadius: 16,
     padding: 14,
     width: 144,
     gap: 4,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
     shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -1011,7 +1023,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 10,
-    backgroundColor: '#006666',
+    backgroundColor: TEAL,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
@@ -1024,7 +1036,7 @@ const styles = StyleSheet.create({
   },
 
   topTutorAvatarText: {
-    color: '#FFFFFF',
+    color: CARD,
     fontSize: 18,
     fontWeight: '800',
   },
@@ -1038,25 +1050,25 @@ const styles = StyleSheet.create({
 
   verifiedText: {
     fontSize: 9,
-    color: '#006666',
+    color: TEAL,
     fontWeight: '700',
   },
 
   topTutorName: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
     textAlign: 'center',
   },
 
   topTutorSubject: {
     fontSize: 11,
-    color: '#6B7280',
+    color: MUTED,
     textAlign: 'center',
   },
 
   topTutorRate: {
     fontSize: 10,
-    color: '#6B7280',
+    color: MUTED,
   },
 });

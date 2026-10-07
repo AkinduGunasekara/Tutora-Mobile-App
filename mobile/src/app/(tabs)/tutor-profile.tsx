@@ -24,6 +24,9 @@ interface Tutor {
   isVerified: boolean;
   onlineSessions: boolean;
   faceToFaceSessions: boolean;
+  rating?: number;
+  reviewCount?: number;
+  completedSessions?: number;
 }
 
 export default function TutorProfileScreen() {
@@ -62,6 +65,8 @@ export default function TutorProfileScreen() {
         tutorName: tutor?.name,
         tutorSubtitle: tutor?.subjects?.[0] ?? 'General',
         hourlyRate: String(tutor?.hourlyRate ?? 0),
+        rating: String(tutor?.rating ?? 0),
+        reviewCount: String(tutor?.reviewCount ?? 0),
         tutorInitials: tutor?.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase(),
       },
     });
@@ -122,30 +127,31 @@ export default function TutorProfileScreen() {
             )}
           </View>
           <Text style={styles.tutorName}>{tutor.name}</Text>
-          <Text style={styles.tutorTitle}>Verified Tutor</Text>
+          <Text style={styles.tutorTitle}>{tutor.isVerified ? 'Verified Tutor' : 'Tutor'}</Text>
 
           {/* Rating Bar */}
           <TouchableOpacity style={styles.ratingBar} onPress={navigateToReviews}>
             <View style={styles.ratingStars}>
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star-half" size={16} color="#FFB800" />
+              {[1, 2, 3, 4, 5].map((i) => {
+                const r = tutor.rating ?? 0;
+                return (
+                  <Ionicons key={i} name={r >= i ? 'star' : r >= i - 0.5 ? 'star-half' : 'star-outline'} size={16} color="#FFB800" />
+                );
+              })}
             </View>
-            <Text style={styles.ratingText}>4.8</Text>
-            <Text style={styles.reviewCount}>(124 reviews)</Text>
+            <Text style={styles.ratingText}>{tutor.reviewCount ? (tutor.rating ?? 0).toFixed(1) : 'New'}</Text>
+            <Text style={styles.reviewCount}>({tutor.reviewCount ?? 0} reviews)</Text>
             <Ionicons name="chevron-forward" size={16} color="#6B7280" />
           </TouchableOpacity>
 
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>500+</Text>
+              <Text style={styles.statValue}>{tutor.completedSessions ?? 0}</Text>
               <Text style={styles.statLabel}>Sessions</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>4.8</Text>
+              <Text style={styles.statValue}>{tutor.reviewCount ? (tutor.rating ?? 0).toFixed(1) : '—'}</Text>
               <Text style={styles.statLabel}>Rating</Text>
             </View>
             <View style={styles.statDivider} />

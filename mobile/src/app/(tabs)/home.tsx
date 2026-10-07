@@ -31,6 +31,7 @@ interface Tutor {
   subjects?: string[];
   hourlyRate?: number;
   rating?: number;
+  reviewCount?: number;
   isVerified?: boolean;
   avatar?: string;
 }
@@ -113,8 +114,8 @@ export default function HomeScreen() {
         tutorId:       tutor._id,
         tutorName:     tutor.name,
         tutorSubtitle: tutor.subjects?.[0] ?? 'General',
-        rating:        '4.8',
-        reviewCount:   '0',
+        rating:        String(tutor.rating ?? 0),
+        reviewCount:   String(tutor.reviewCount ?? 0),
         hourlyRate:    String(tutor.hourlyRate ?? 0),
         tutorInitials: getInitials(tutor.name),
         subject:       tutor.subjects?.[0] ?? 'General',

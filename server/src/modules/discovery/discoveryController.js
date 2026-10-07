@@ -2,6 +2,7 @@ const User = require('../auth/User');
 const Review = require('./Review');
 const CustomSessionRequest = require('./CustomSessionRequest');
 const { createBookingFromRequest } = require('../tutor/tutorService');
+const { attachTutorStats } = require('../../shared/tutorStats');
 
 // @desc    Search for tutors with filters
 // @route   GET /api/discovery/search
@@ -80,10 +81,11 @@ const searchTutors = async (req, res) => {
       });
     }
 
+    const withStats = await attachTutorStats(filteredTutors);
     res.json({
       success: true,
-      count: filteredTutors.length,
-      data: filteredTutors,
+      count: withStats.length,
+      data: withStats,
     });
   } catch (error) {
     console.error('Search tutors error:', error);
@@ -111,9 +113,10 @@ const getTutorProfile = async (req, res) => {
       });
     }
 
+    const [withStats] = await attachTutorStats([tutor]);
     res.json({
       success: true,
-      data: tutor,
+      data: withStats,
     });
   } catch (error) {
     console.error('Get tutor profile error:', error);

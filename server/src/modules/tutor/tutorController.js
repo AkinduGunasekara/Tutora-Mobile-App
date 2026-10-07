@@ -489,9 +489,18 @@ exports.getConversations = async (req, res) => {
           sentAt: last.sentAt,
           mine: String(last.sender) === String(req.user._id),
         } : null,
-        lastActivity: last?.sentAt || s.updatedAt,
+        lastActivity: last?.sentAt || s.scheduledDate,
       };
-    }).sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+    })
+      // Hide finished sessions that never had a chat
+      .filter((c) => c.lastMessage || c.sessionStatus !== 'completed')
+      // Chats with messages first (newest first), then upcoming sessions by date
+      .sort((a, b) => {
+        if (!!a.lastMessage !== !!b.lastMessage) return a.lastMessage ? -1 : 1;
+        return a.lastMessage
+          ? new Date(b.lastActivity) - new Date(a.lastActivity)
+          : new Date(a.lastActivity) - new Date(b.lastActivity);
+      });
     res.json({ items });
   } catch (err) {
     fail(res, err, 'Could not load conversations');

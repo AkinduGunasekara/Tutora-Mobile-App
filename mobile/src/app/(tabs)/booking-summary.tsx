@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -154,10 +155,11 @@ export default function BookingSummaryScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back to session details" onPress={backToSessionDetails} hitSlop={10}>
-            <Text style={styles.back}>‹</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back to session details" onPress={backToSessionDetails} hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
           </Pressable>
           <Text style={styles.headerTitle}>Booking Summary</Text>
+          <View style={{ width: 22 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -239,17 +241,8 @@ function SummaryRow({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAGE },
   page: { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', backgroundColor: PAGE },
-  header: {
-    height: 52,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E4E1D2',
-  },
-  back: { color: INK, fontSize: 32, lineHeight: 36, width: 20 },
-  headerTitle: { color: INK, fontSize: 16, fontWeight: '700' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E4E1D2', gap: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: INK, flex: 1, textAlign: 'center' },
   content: { padding: 16, paddingBottom: 20, gap: 14 },
   tutorCard: {
     minHeight: 68,
@@ -281,7 +274,7 @@ const styles = StyleSheet.create({
   rating: { color: INK, fontSize: 10, fontWeight: '700' },
   reviews: { color: INK, fontSize: 10 },
   rate: { color: TEAL, fontSize: 11, fontWeight: '800' },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 11 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   sectionTitle: { color: INK, fontSize: 12, fontWeight: '700', marginBottom: 8 },
   summaryRow: { minHeight: 21, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   rowLabel: { color: MUTED, fontSize: 10 },
@@ -291,15 +284,9 @@ const styles = StyleSheet.create({
   messageText: { color: INK, fontSize: 10, lineHeight: 16 },
   freeText: { color: TEAL },
   divider: { height: 1, backgroundColor: '#E6E6E6', marginVertical: 4 },
-  confirmButton: {
-    minHeight: 44,
-    borderRadius: 9,
-    backgroundColor: TEAL,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  confirmButton: { backgroundColor: TEAL, borderRadius: 23, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
   confirmButtonDisabled: { opacity: 0.75 },
-  confirmText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  confirmText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
   errorText: { color: '#B42318', fontSize: 12, textAlign: 'center' },
   pressed: { opacity: 0.82 },
 });

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -144,10 +145,11 @@ export default function RescheduleConfirmationScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Back to reschedule form" onPress={returnToEditor} hitSlop={10}>
-            <Text style={styles.back}>‹</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to reschedule form" onPress={returnToEditor} hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
           </Pressable>
           <Text style={styles.headerTitle}>Confirm Reschedule</Text>
+          <View style={{ width: 22 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -200,11 +202,10 @@ export default function RescheduleConfirmationScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAGE },
   page: { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', backgroundColor: PAGE },
-  header: { height: 52, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', gap: 16, borderBottomWidth: 1, borderBottomColor: '#E4E1D2' },
-  back: { color: INK, fontSize: 30, lineHeight: 36, width: 20 },
-  headerTitle: { color: INK, fontSize: 16, fontWeight: '700' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E4E1D2', gap: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: INK, flex: 1, textAlign: 'center' },
   content: { padding: 16, paddingBottom: 24, gap: 14 },
-  tutorCard: { minHeight: 66, backgroundColor: '#FFFFFF', borderRadius: 11, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 9 },
+  tutorCard: { minHeight: 66, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, flexDirection: 'row', alignItems: 'center', gap: 9 },
   avatar: { width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: TEAL, backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   tutorCopy: { flex: 1, gap: 2 },
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   tutorSubtitle: { color: MUTED, fontSize: 9 },
   rating: { color: INK, fontSize: 9, fontWeight: '600' },
   rate: { color: TEAL, fontSize: 10, fontWeight: '800' },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 11, gap: 8 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, gap: 8 },
   sectionTitle: { color: INK, fontSize: 12, fontWeight: '700', marginBottom: 1 },
   scheduleBlock: { backgroundColor: '#F4F4F4', borderRadius: 7, padding: 9, gap: 3 },
   blockLabel: { color: MUTED, fontSize: 8, fontWeight: '800' },
@@ -226,8 +227,8 @@ const styles = StyleSheet.create({
   sessionMeta: { color: MUTED, fontSize: 9, marginHorizontal: 7, marginTop: -8 },
   error: { color: '#B42318', fontSize: 11, textAlign: 'center' },
   actions: { gap: 5, marginTop: 2 },
-  confirmButton: { minHeight: 44, borderRadius: 9, backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center' },
-  confirmText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  confirmButton: { backgroundColor: TEAL, borderRadius: 23, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+  confirmText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
   cancelButton: { minHeight: 30, alignItems: 'center', justifyContent: 'center' },
   cancelText: { color: TEAL, fontSize: 11, fontWeight: '700' },
   disabled: { opacity: 0.75 },

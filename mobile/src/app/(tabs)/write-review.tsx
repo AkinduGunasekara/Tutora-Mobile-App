@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   TextInput,
   Alert,
@@ -14,6 +14,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import api from '@/lib/api';
+
+const PAGE = '#EFEDDC';
+const INK = '#171943';
+const TEAL = '#008C91';
+const MUTED = '#78809A';
+const CARD = '#FFFFFF';
 
 interface Tutor {
   _id: string;
@@ -96,20 +102,20 @@ export default function WriteReviewScreen() {
   };
 
   const RatingStar = ({ star }: { star: number }) => (
-    <TouchableOpacity onPress={() => setRating(star)}>
+    <Pressable onPress={() => setRating(star)} hitSlop={4}>
       <Ionicons
         name={star <= rating ? 'star' : 'star-outline'}
         size={32}
         color={star <= rating ? '#FFB800' : '#D1D5DB'}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 
   if (loading) {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#006666" />
+          <ActivityIndicator size="large" color={TEAL} />
         </View>
       </SafeAreaView>
     );
@@ -118,11 +124,11 @@ export default function WriteReviewScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
-        </TouchableOpacity>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <Ionicons name="chevron-back" size={22} color={INK} />
+        </Pressable>
         <Text style={styles.headerTitle}>Rate Your Session</Text>
-        <View style={{ width: 24 }} />
+        <View style={{ width: 22 }} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -167,7 +173,7 @@ export default function WriteReviewScreen() {
           <Text style={styles.sectionTitle}>What went well?</Text>
           <View style={styles.tagsContainer}>
             {reviewTags.map((tag) => (
-              <TouchableOpacity
+              <Pressable
                 key={tag}
                 style={[
                   styles.tag,
@@ -183,7 +189,7 @@ export default function WriteReviewScreen() {
                 >
                   {tag}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -194,6 +200,7 @@ export default function WriteReviewScreen() {
           <TextInput
             style={styles.textArea}
             placeholder="Share your experience with this tutor..."
+            placeholderTextColor={MUTED}
             value={comment}
             onChangeText={setComment}
             multiline
@@ -204,17 +211,17 @@ export default function WriteReviewScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity
+        <Pressable
           style={styles.submitButton}
           onPress={handleSubmit}
           disabled={submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={CARD} />
           ) : (
-            <Text style={styles.submitButtonText}>Submit Review</Text>
+            <Text style={styles.submitButtonText}>SUBMIT REVIEW</Text>
           )}
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -223,7 +230,7 @@ export default function WriteReviewScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
   },
   loadingContainer: {
     flex: 1,
@@ -232,16 +239,20 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E1D2',
+    gap: 10,
+    backgroundColor: CARD,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 17,
+    fontWeight: '800',
+    color: INK,
+    flex: 1,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -250,9 +261,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     padding: 20,
     marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E1D2',
   },
   tutorAvatar: {
     width: 56,
@@ -265,12 +278,12 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   avatarPlaceholder: {
-    backgroundColor: '#006666',
+    backgroundColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
+    color: CARD,
     fontSize: 18,
     fontWeight: '700',
   },
@@ -280,23 +293,33 @@ const styles = StyleSheet.create({
   tutorName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
     marginBottom: 4,
   },
   sessionInfo: {
     fontSize: 13,
-    color: '#6B7280',
+    color: MUTED,
   },
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     padding: 20,
     marginBottom: 12,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 13,
+    fontWeight: '800',
+    color: INK,
     marginBottom: 16,
+    letterSpacing: 0.5,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -304,8 +327,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   ratingText: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: 13,
+    color: MUTED,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -313,51 +336,56 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tag: {
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E4E1D2',
   },
   tagActive: {
-    backgroundColor: '#E8F5F5',
-    borderColor: '#006666',
+    backgroundColor: '#E1F4EF',
+    borderColor: TEAL,
   },
   tagText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: MUTED,
     fontWeight: '500',
   },
   tagTextActive: {
-    color: '#006666',
+    color: TEAL,
     fontWeight: '600',
   },
   textArea: {
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 16,
-    color: '#1A1A2E',
+    fontSize: 15,
+    color: INK,
     minHeight: 120,
     textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: '#E4E1D2',
   },
   footer: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: '#E4E1D2',
   },
   submitButton: {
-    backgroundColor: '#006666',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: CARD,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

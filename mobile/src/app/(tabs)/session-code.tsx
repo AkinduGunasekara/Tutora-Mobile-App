@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -86,7 +87,7 @@ export default function SessionCodeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.backIcon}>{'<'}</Text>
+          <Ionicons name="chevron-back" size={22} color="rgba(255,255,255,0.9)" />
         </Pressable>
         <Text style={styles.headerTitle}>Code Sandbox</Text>
         <Pressable style={styles.saveBtn} onPress={handleSave} disabled={saving}>

@@ -156,7 +156,6 @@ export default function RescheduleConfirmationScreen() {
             <View style={styles.tutorCopy}>
               <Text style={styles.tutorName}>{tutorName} <Text style={styles.verified}>✓</Text></Text>
               <Text numberOfLines={1} style={styles.tutorSubtitle}>{tutorSubtitle}</Text>
-              <Text style={styles.rating}>☆ 4.9 (124 reviews)</Text>
             </View>
             {hourlyRate ? <Text style={styles.rate}>Rs {hourlyRate}/Hr</Text> : null}
           </View>

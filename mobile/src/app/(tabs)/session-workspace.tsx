@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert, Pressable, ScrollView, StyleSheet,
   Text, TextInput, View,
@@ -23,11 +23,6 @@ const DEFAULT_CODE: Record<string, string> = {
   Java: 'System.out.println("Hello, World!");', 'C++': 'cout << "Hello, World!";',
   SQL: 'SELECT "Hello, World!" AS msg;', HTML: '<h1>Hello, World!</h1>',
 };
-const MOCK_FILES = [
-  { name: 'lecture_notes.pdf', type: 'pdf' },
-  { name: 'exercise_set.docx', type: 'document' },
-  { name: 'solution.js',       type: 'code' },
-];
 
 export default function SessionWorkspaceScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
@@ -37,6 +32,13 @@ export default function SessionWorkspaceScreen() {
   const [code,  setCode]   = useState(DEFAULT_CODE['JS']);
   const [notes, setNotes]  = useState('');
   const [saving, setSaving]= useState(false);
+  const [files, setFiles] = useState<{ name: string; type: string }[]>([]);
+
+  // Files shared in this session (same list as the session's Files screen)
+  useEffect(() => {
+    if (!sessionId) return;
+    api.get(`/session/${sessionId}`).then(({ data }) => setFiles(data.files ?? [])).catch(() => {});
+  }, [sessionId]);
 
   const handleSaveAll = async () => {
     setSaving(true);
@@ -112,7 +114,8 @@ export default function SessionWorkspaceScreen() {
         {/* Files tab */}
         {activeTab === 'Files' && (
           <View style={styles.tabContent}>
-            {MOCK_FILES.map((f, i) => (
+            {files.length === 0 && <Text style={styles.fileName}>No files shared yet.</Text>}
+            {files.map((f, i) => (
               <View key={i} style={styles.fileCard}>
                 <View style={styles.fileTag}>
                   <Text style={styles.fileTagText}>{f.type.slice(0, 3).toUpperCase()}</Text>

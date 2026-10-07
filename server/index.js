@@ -6,7 +6,9 @@ const authRoutes    = require('./src/modules/auth/authRoutes');
 const bookingRoutes = require('./src/modules/booking/bookingRoutes');
 const sessionRoutes = require('./src/modules/session/sessionRoutes');
 const discoveryRoutes = require('./src/modules/discovery/discoveryRoutes');
-const tutorRoutes = require('./src/modules/tutor/tutorRoutes');
+const tutorRoutes    = require('./src/modules/tutor/tutorRoutes');
+const paymentRoutes  = require('./src/modules/payment/paymentRoutes');
+const chatRoutes     = require('./src/modules/chat/chatRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,7 +26,9 @@ app.use('/api/auth',     authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/session',  sessionRoutes);
 app.use('/api/discovery', discoveryRoutes);
-app.use('/api/tutor', tutorRoutes);
+app.use('/api/tutor',    tutorRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/chat',    chatRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

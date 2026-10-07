@@ -53,6 +53,11 @@ exports.createSession = async (req, res) => {
     if (bookingId && mongoose.isValidObjectId(bookingId)) {
       const booking = await Booking.findOne({ _id: bookingId, student: req.user.id });
       if (booking) {
+        // If tutor.userId is missing in the snapshot, patch it from the request body
+        if (!booking.tutor.userId && tutorId && mongoose.isValidObjectId(tutorId)) {
+          booking.tutor.userId = tutorId;
+          await booking.save();
+        }
         const existing = await ensureSessionForBooking(booking);
         if (existing) {
           if (paymentMethod && existing.paymentStatus === 'pending') {

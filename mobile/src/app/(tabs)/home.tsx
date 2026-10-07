@@ -238,9 +238,9 @@ export default function HomeScreen() {
                   {(t.rating ?? 0) > 0 && (
                     <Text style={styles.tutorRating}>★ {t.rating!.toFixed(1)}</Text>
                   )}
-                  <Text style={styles.tutorRate}>
-                    {(t.hourlyRate ?? 0) > 0 ? `LKR ${t.hourlyRate}/hr` : 'Rate TBD'}
-                  </Text>
+                  {(t.hourlyRate ?? 0) > 0 && (
+                    <Text style={styles.tutorRate}>LKR {t.hourlyRate}/hr</Text>
+                  )}
                   <Pressable
                     style={({ pressed }) => [styles.bookBtn, pressed && { opacity: 0.8 }]}
                     onPress={() => handleBook(t)}>

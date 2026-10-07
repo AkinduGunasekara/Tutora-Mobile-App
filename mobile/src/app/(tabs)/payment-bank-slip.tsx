@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
@@ -96,7 +97,7 @@ export default function PaymentBankSlipScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.backIcon}>{'<'}</Text>
+          <Ionicons name="chevron-back" size={22} color={INK} />
         </Pressable>
         <Text style={styles.headerTitle}>Bank Transfer</Text>
         <View style={{ width: 24 }} />

@@ -187,6 +187,7 @@ export default function TabsLayout() {
 
       {/* ── Chat module screens (IT23730892) ── */}
       <Tabs.Screen name="chat-conversation"         options={{ href: null }} />
+      <Tabs.Screen name="chat-files"                options={{ href: null }} />
 
       {/* ── Discovery module screens (IT23732254) ── */}
       <Tabs.Screen name="tutor-filters"            options={{ href: null }} />

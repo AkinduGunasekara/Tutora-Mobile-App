@@ -25,7 +25,7 @@ export default function PaymentProcessingScreen() {
   const params = useLocalSearchParams<{
     bookingId: string; tutorId: string; tutorName: string;
     subject: string; durationHours: string; hourlyRate: string;
-    scheduledDate: string; paymentMethod: string;
+    scheduledDate: string; paymentMethod: string; paymentId?: string;
   }>();
 
   const { token } = useAuth();
@@ -73,6 +73,10 @@ export default function PaymentProcessingScreen() {
         });
         sessionIdRef.current = session._id;
         await api.patch(`/session/${session._id}/confirm-payment`);
+        // If a bank-slip payment record exists, link it to this session
+        if (params.paymentId) {
+          await api.patch(`/payment/${params.paymentId}/verify`, { sessionId: session._id });
+        }
       } catch (err: any) {
         clearTimeout(t1);
         clearTimeout(t2);

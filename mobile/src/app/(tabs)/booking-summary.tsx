@@ -63,10 +63,10 @@ export default function BookingSummaryScreen() {
   const duration = asText(params.duration, '1 HR');
   const meetingType = asText(params.meetingType, 'Microsoft Teams');
   const message = asText(params.message, '');
-  const tutorName = asText(params.tutorName, 'Anjana Gayantha');
+  const tutorName = asText(params.tutorName, 'Tutor');
   const tutorSubtitle = asText(params.tutorSubtitle, 'Software Engineer at SLIIT');
-  const rating = asText(params.rating, '4.9');
-  const reviewCount = asText(params.reviewCount, '124');
+  const rating = asText(params.rating, '0');
+  const reviewCount = asText(params.reviewCount, '0');
   const hourlyRate = asText(params.hourlyRate, 'Rs 1,000/Hr');
   const tutorInitials = asText(params.tutorInitials, 'AG');
   const existingBookingId = asText(params.bookingId, '');

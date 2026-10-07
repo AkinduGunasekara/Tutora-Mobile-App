@@ -52,7 +52,7 @@ export default function BookingConfirmedScreen() {
   const time = asText(params.time, '10:00 AM');
   const duration = asText(params.duration, '1 HR');
   const meetingType = asText(params.meetingType, 'Microsoft Teams');
-  const tutorName = asText(params.tutorName, 'Anjana Gayantha');
+  const tutorName = asText(params.tutorName, 'Tutor');
   const tutorId = asText(params.tutorId, '');
   const subject = asText(params.subject, 'General');
   const hourlyRate = asText(params.hourlyRate, '0');

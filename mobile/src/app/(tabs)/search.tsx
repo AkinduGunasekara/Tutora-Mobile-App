@@ -28,6 +28,7 @@ interface Tutor {
   faceToFaceSessions: boolean;
   rating?: number;
   reviewCount?: number;
+  availableToday?: boolean;
 }
 
 interface SearchFilters {
@@ -318,8 +319,8 @@ export default function SearchScreen() {
    * Render individual tutor card.
    */
   const renderTutorCard = ({ item }: { item: Tutor }) => {
-    const rating = item.rating ?? 4.8;
-    const reviewCount = item.reviewCount ?? 124;
+    const rating = item.rating ?? 0;
+    const reviewCount = item.reviewCount ?? 0;
 
     return (
       <TouchableOpacity
@@ -372,7 +373,7 @@ export default function SearchScreen() {
               />
 
               <Text style={styles.ratingText}>
-                {rating.toFixed(1)}
+                {reviewCount > 0 ? rating.toFixed(1) : 'New'}
               </Text>
 
               <Text style={styles.reviewCount}>
@@ -405,9 +406,11 @@ export default function SearchScreen() {
             )}
           </View>
 
-          <Text style={styles.availableText}>
-            Available today
-          </Text>
+          {item.availableToday && (
+            <Text style={styles.availableText}>
+              Available today
+            </Text>
+          )}
         </View>
       </TouchableOpacity>
     );

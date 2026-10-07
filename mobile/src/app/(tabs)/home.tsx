@@ -37,15 +37,6 @@ interface Tutor {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SUBJECTS = [
-  { name: 'Programming' },
-  { name: 'Mathematics' },
-  { name: 'Chemistry' },
-  { name: 'Data Science' },
-  { name: 'Physics' },
-  { name: 'English' },
-];
-
 const AVATAR_COLORS = ['#667EEA', '#F093FB', '#4FACFE', '#43E97B', '#FA709A', '#FDB863'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -105,6 +96,11 @@ export default function HomeScreen() {
 
   const firstName = user.name.split(' ')[0];
   const isStudent = user.role !== 'tutor';
+
+  // Collect unique subjects from all fetched tutors
+  const subjects = Array.from(
+    new Set(tutors.flatMap((t) => t.subjects ?? []))
+  ).slice(0, 10);
 
   function handleBook(tutor: Tutor) {
     router.push({
@@ -179,27 +175,29 @@ export default function HomeScreen() {
         )}
 
         {/* ── Browse by Subject ──────────────────────────────── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>BROWSE BY SUBJECT</Text>
+        {subjects.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>BROWSE BY SUBJECT</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.subjectsRow}>
+              {subjects.map((name) => (
+                <Pressable
+                  key={name}
+                  style={styles.subjectChip}
+                  onPress={() => router.push({
+                    pathname: '/(tabs)/search' as any,
+                    params: { subject: name },
+                  })}>
+                  <Text style={styles.subjectName}>{name}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subjectsRow}>
-            {SUBJECTS.map((s) => (
-              <Pressable
-                key={s.name}
-                style={styles.subjectChip}
-                onPress={() => router.push({
-                  pathname: '/(tabs)/search' as any,
-                  params: { subject: s.name },
-                })}>
-                <Text style={styles.subjectName}>{s.name}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
+        )}
 
         {/* ── Top Tutors ────────────────────────────────────── */}
         <View style={styles.section}>
@@ -239,9 +237,9 @@ export default function HomeScreen() {
                   {(t.rating ?? 0) > 0 && (
                     <Text style={styles.tutorRating}>★ {t.rating!.toFixed(1)}</Text>
                   )}
-                  {t.hourlyRate !== undefined && (
-                    <Text style={styles.tutorRate}>LKR {t.hourlyRate}/hr</Text>
-                  )}
+                  <Text style={styles.tutorRate}>
+                    {(t.hourlyRate ?? 0) > 0 ? `LKR ${t.hourlyRate}/hr` : 'Rate TBD'}
+                  </Text>
                   <Pressable
                     style={({ pressed }) => [styles.bookBtn, pressed && { opacity: 0.8 }]}
                     onPress={() => handleBook(t)}>

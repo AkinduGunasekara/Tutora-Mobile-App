@@ -220,7 +220,7 @@ function PaymentCard({ item, onDetails }: { item: EarningItem; onDetails: () => 
           <Text style={styles.value}>{item.statusLabel}</Text>
         </View>
       </View>
-      <PrimaryButton label="[View Details]" compact onPress={onDetails} />
+      <PrimaryButton label="View Details" compact onPress={onDetails} />
     </Card>
   );
 }

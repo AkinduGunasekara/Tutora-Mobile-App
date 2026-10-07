@@ -38,8 +38,7 @@ interface AuthContextType {
 }
 
 // Tutors land on their dashboard, students on the existing home screen
-export const homeRouteFor = (role: Role) =>
-  (role === 'tutor' ? '/(tabs)/tutor/dashboard' : '/(tabs)/home') as any;
+export const homeRouteFor = (_role: Role) => '/(tabs)/home' as any;
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 

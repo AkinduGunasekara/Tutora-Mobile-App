@@ -185,6 +185,9 @@ export default function TabsLayout() {
       <Tabs.Screen name="session-workspace"        options={{ href: null }} />
       <Tabs.Screen name="session-completed"        options={{ href: null }} />
 
+      {/* ── Chat module screens (IT23730892) ── */}
+      <Tabs.Screen name="chat-conversation"         options={{ href: null }} />
+
       {/* ── Discovery module screens (IT23732254) ── */}
       <Tabs.Screen name="tutor-filters"            options={{ href: null }} />
       <Tabs.Screen name="tutor-profile"            options={{ href: null }} />

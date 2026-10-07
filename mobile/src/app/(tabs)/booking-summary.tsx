@@ -57,7 +57,6 @@ export default function BookingSummaryScreen() {
   }>();
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [bookingId, setBookingId] = useState('');
 
   const dateLabel = asText(params.dateLabel, 'Wed, Oct 14, 2026');
   const time = asText(params.time, '10:00 AM');
@@ -84,7 +83,7 @@ export default function BookingSummaryScreen() {
   const meetingLabel = meetingType === 'Microsoft Teams' ? 'Microsoft Teams Meeting' : meetingType;
 
   const confirmBooking = async () => {
-    if (submitting || bookingId) return;
+    if (submitting) return;
     setSubmitting(true);
     setErrorMessage('');
 
@@ -110,9 +109,8 @@ export default function BookingSummaryScreen() {
             hourlyRate: hourlyAmount,
           },
         });
-      const savedId = String(data.booking?.id ?? data.booking?._id ?? existingBookingId);
-      setBookingId(savedId);
-      router.push({
+      const savedId = String(data.booking?.id ?? data.booking?._id ?? '');
+      router.replace({
         pathname: '/(tabs)/booking-confirmed' as any,
         params: {
           bookingId: savedId,
@@ -127,7 +125,6 @@ export default function BookingSummaryScreen() {
       });
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message ?? 'Could not save your booking. Please try again.');
-    } finally {
       setSubmitting(false);
     }
   };
@@ -205,22 +202,15 @@ export default function BookingSummaryScreen() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityState={{ disabled: submitting || Boolean(bookingId) }}
-            disabled={submitting || Boolean(bookingId)}
+            accessibilityState={{ disabled: submitting }}
+            disabled={submitting}
             onPress={confirmBooking}
-            style={({ pressed }) => [styles.confirmButton, pressed && styles.pressed, (submitting || bookingId) && styles.confirmButtonDisabled]}>
+            style={({ pressed }) => [styles.confirmButton, pressed && styles.pressed, submitting && styles.confirmButtonDisabled]}>
             {submitting
               ? <ActivityIndicator color="#FFFFFF" />
-              : <Text style={styles.confirmText}>{bookingId ? 'Booking Request Sent' : existingBookingId ? 'Confirm Reschedule' : 'Confirm Booking'}</Text>}
+              : <Text style={styles.confirmText}>{existingBookingId ? 'Confirm Reschedule' : 'Confirm Booking'}</Text>}
           </Pressable>
           {errorMessage ? <Text accessibilityLiveRegion="polite" style={styles.errorText}>{errorMessage}</Text> : null}
-          {bookingId ? (
-            <View accessibilityLiveRegion="polite" style={styles.successCard}>
-              <Text style={styles.successTitle}>Booking saved</Text>
-              <Text style={styles.successText}>Request ID: {bookingId}</Text>
-              <Text style={styles.successText}>Status: Pending tutor confirmation</Text>
-            </View>
-          ) : null}
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -311,8 +301,5 @@ const styles = StyleSheet.create({
   confirmButtonDisabled: { opacity: 0.75 },
   confirmText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   errorText: { color: '#B42318', fontSize: 12, textAlign: 'center' },
-  successCard: { backgroundColor: '#E1F4EF', borderRadius: 10, padding: 12, gap: 4 },
-  successTitle: { color: INK, fontWeight: '700', fontSize: 13 },
-  successText: { color: INK, fontSize: 11 },
   pressed: { opacity: 0.82 },
 });

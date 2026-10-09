@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Image,
   ActivityIndicator,
@@ -12,6 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import api from '@/lib/api';
+
+const PAGE = '#EFEDDC';
+const INK = '#171943';
+const TEAL = '#008C91';
+const MUTED = '#78809A';
+const CARD = '#FFFFFF';
 
 interface Tutor {
   _id: string;
@@ -24,6 +30,9 @@ interface Tutor {
   isVerified: boolean;
   onlineSessions: boolean;
   faceToFaceSessions: boolean;
+  rating?: number;
+  reviewCount?: number;
+  completedSessions?: number;
 }
 
 export default function TutorProfileScreen() {
@@ -55,7 +64,18 @@ export default function TutorProfileScreen() {
   };
 
   const navigateToAvailability = () => {
-    router.push(`/schedule?tutorId=${tutorId}`);
+    router.push({
+      pathname: '/schedule',
+      params: {
+        tutorId,
+        tutorName: tutor?.name,
+        tutorSubtitle: tutor?.subjects?.[0] ?? 'General',
+        hourlyRate: String(tutor?.hourlyRate ?? 0),
+        rating: String(tutor?.rating ?? 0),
+        reviewCount: String(tutor?.reviewCount ?? 0),
+        tutorInitials: tutor?.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase(),
+      },
+    });
   };
 
   const navigateToCustomSession = () => {
@@ -66,7 +86,7 @@ export default function TutorProfileScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#008C91" />
+          <ActivityIndicator size="large" color={TEAL} />
         </View>
       </SafeAreaView>
     );
@@ -87,13 +107,11 @@ export default function TutorProfileScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
-          </TouchableOpacity>
+          <Pressable onPress={() => router.back()} hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
+          </Pressable>
           <Text style={styles.headerTitle}>Tutor Profile</Text>
-          <TouchableOpacity>
-            <Ionicons name="share-outline" size={24} color="#1A1A2E" />
-          </TouchableOpacity>
+          <View style={{ width: 22 }} />
         </View>
 
         {/* Profile Info */}
@@ -110,35 +128,36 @@ export default function TutorProfileScreen() {
             )}
             {tutor.isVerified && (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark-circle" size={20} color="#008C91" />
+                <Ionicons name="checkmark-circle" size={20} color={TEAL} />
               </View>
             )}
           </View>
           <Text style={styles.tutorName}>{tutor.name}</Text>
-          <Text style={styles.tutorTitle}>Verified Tutor</Text>
+          <Text style={styles.tutorTitle}>{tutor.isVerified ? 'Verified Tutor' : 'Tutor'}</Text>
 
           {/* Rating Bar */}
-          <TouchableOpacity style={styles.ratingBar} onPress={navigateToReviews}>
+          <Pressable style={styles.ratingBar} onPress={navigateToReviews}>
             <View style={styles.ratingStars}>
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star" size={16} color="#FFB800" />
-              <Ionicons name="star-half" size={16} color="#FFB800" />
+              {[1, 2, 3, 4, 5].map((i) => {
+                const r = tutor.rating ?? 0;
+                return (
+                  <Ionicons key={i} name={r >= i ? 'star' : r >= i - 0.5 ? 'star-half' : 'star-outline'} size={16} color="#FFB800" />
+                );
+              })}
             </View>
-            <Text style={styles.ratingText}>4.8</Text>
-            <Text style={styles.reviewCount}>(124 reviews)</Text>
-            <Ionicons name="chevron-forward" size={16} color="#6B7280" />
-          </TouchableOpacity>
+            <Text style={styles.ratingText}>{tutor.reviewCount ? (tutor.rating ?? 0).toFixed(1) : 'New'}</Text>
+            <Text style={styles.reviewCount}>({tutor.reviewCount ?? 0} reviews)</Text>
+            <Ionicons name="chevron-forward" size={16} color={MUTED} />
+          </Pressable>
 
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>500+</Text>
+              <Text style={styles.statValue}>{tutor.completedSessions ?? 0}</Text>
               <Text style={styles.statLabel}>Sessions</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>4.8</Text>
+              <Text style={styles.statValue}>{tutor.reviewCount ? (tutor.rating ?? 0).toFixed(1) : '—'}</Text>
               <Text style={styles.statLabel}>Rating</Text>
             </View>
             <View style={styles.statDivider} />
@@ -172,7 +191,7 @@ export default function TutorProfileScreen() {
           <Text style={styles.sectionTitle}>Education & Credentials</Text>
           {tutor.qualifications.map((qual, index) => (
             <View key={index} style={styles.qualificationItem}>
-              <Ionicons name="school-outline" size={20} color="#008C91" />
+              <Ionicons name="school-outline" size={20} color={TEAL} />
               <Text style={styles.qualificationText}>{qual}</Text>
             </View>
           ))}
@@ -193,13 +212,13 @@ export default function TutorProfileScreen() {
           <View style={styles.modesContainer}>
             {tutor.onlineSessions && (
               <View style={styles.modeItem}>
-                <Ionicons name="globe-outline" size={20} color="#008C91" />
+                <Ionicons name="globe-outline" size={20} color={TEAL} />
                 <Text style={styles.modeText}>Online Sessions</Text>
               </View>
             )}
             {tutor.faceToFaceSessions && (
               <View style={styles.modeItem}>
-                <Ionicons name="person-outline" size={20} color="#008C91" />
+                <Ionicons name="person-outline" size={20} color={TEAL} />
                 <Text style={styles.modeText}>In-person Sessions</Text>
               </View>
             )}
@@ -208,18 +227,18 @@ export default function TutorProfileScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity
+          <Pressable
             style={styles.primaryButton}
             onPress={navigateToAvailability}
           >
-            <Text style={styles.primaryButtonText}>View Availability & Book</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+            <Text style={styles.primaryButtonText}>VIEW AVAILABILITY & BOOK</Text>
+          </Pressable>
+          <Pressable
             style={styles.secondaryButton}
             onPress={navigateToCustomSession}
           >
-            <Text style={styles.secondaryButtonText}>Request Custom Session</Text>
-          </TouchableOpacity>
+            <Text style={styles.secondaryButtonText}>REQUEST CUSTOM SESSION</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -229,7 +248,7 @@ export default function TutorProfileScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
   },
   loadingContainer: {
     flex: 1,
@@ -243,30 +262,35 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: MUTED,
   },
   content: {
     flex: 1,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E1D2',
+    gap: 10,
+    backgroundColor: CARD,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 17,
+    fontWeight: '800',
+    color: INK,
+    flex: 1,
+    textAlign: 'center',
   },
   profileSection: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     padding: 24,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E4E1D2',
+    marginBottom: 12,
   },
   avatarContainer: {
     position: 'relative',
@@ -278,12 +302,12 @@ const styles = StyleSheet.create({
     borderRadius: 48,
   },
   avatarPlaceholder: {
-    backgroundColor: '#008C91',
+    backgroundColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
+    color: CARD,
     fontSize: 28,
     fontWeight: '700',
   },
@@ -291,18 +315,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     borderRadius: 12,
   },
   tutorName: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
     marginBottom: 4,
   },
   tutorTitle: {
     fontSize: 14,
-    color: '#008C91',
+    color: TEAL,
     fontWeight: '600',
     marginBottom: 16,
   },
@@ -310,7 +334,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
@@ -323,11 +347,11 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
   },
   reviewCount: {
     fontSize: 13,
-    color: '#6B7280',
+    color: MUTED,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -335,7 +359,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: '#E4E1D2',
   },
   statItem: {
     alignItems: 'center',
@@ -343,31 +367,40 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: MUTED,
     marginTop: 4,
   },
   statDivider: {
     width: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E4E1D2',
   },
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     padding: 20,
-    marginTop: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
+    borderRadius: 16,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 16,
+    fontWeight: '800',
+    color: INK,
     marginBottom: 12,
   },
   bioText: {
     fontSize: 14,
-    color: '#4B5563',
+    color: MUTED,
     lineHeight: 22,
   },
   subjectsContainer: {
@@ -376,14 +409,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   subjectTag: {
-    backgroundColor: '#E8F5F5',
+    backgroundColor: '#E1F4EF',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
   },
   subjectTagText: {
     fontSize: 13,
-    color: '#008C91',
+    color: TEAL,
     fontWeight: '600',
   },
   qualificationItem: {
@@ -394,7 +427,7 @@ const styles = StyleSheet.create({
   },
   qualificationText: {
     fontSize: 14,
-    color: '#4B5563',
+    color: MUTED,
     flex: 1,
   },
   feeContainer: {
@@ -405,11 +438,11 @@ const styles = StyleSheet.create({
   feeAmount: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#008C91',
+    color: TEAL,
   },
   feePeriod: {
     fontSize: 14,
-    color: '#6B7280',
+    color: MUTED,
   },
   modesContainer: {
     flexDirection: 'row',
@@ -422,37 +455,40 @@ const styles = StyleSheet.create({
   },
   modeText: {
     fontSize: 14,
-    color: '#4B5563',
+    color: MUTED,
   },
   actionsContainer: {
-    backgroundColor: '#FFFFFF',
     padding: 20,
-    marginTop: 12,
     gap: 12,
     marginBottom: 24,
   },
   primaryButton: {
-    backgroundColor: '#008C91',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: CARD,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   secondaryButton: {
-    backgroundColor: '#F5F6FA',
-    paddingVertical: 16,
-    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   secondaryButtonText: {
-    color: '#008C91',
-    fontSize: 16,
-    fontWeight: '700',
+    color: TEAL,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

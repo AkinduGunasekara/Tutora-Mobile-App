@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -18,12 +19,6 @@ const TYPE_LABEL: Record<string, string> = {
   document: 'DOC', image: 'IMG', code: 'CODE', video: 'VID', pdf: 'PDF',
 };
 
-const MOCK_FILES = [
-  { name: 'lecture_notes.pdf', type: 'pdf',      uploadedAt: new Date(Date.now() - 5 * 60000).toISOString() },
-  { name: 'exercise_set.docx', type: 'document', uploadedAt: new Date(Date.now() - 12 * 60000).toISOString() },
-  { name: 'solution.js',       type: 'code',     uploadedAt: new Date(Date.now() - 20 * 60000).toISOString() },
-];
-
 function relativeTime(iso: string) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60)    return 'just now';
@@ -41,9 +36,9 @@ export default function SessionFilesScreen() {
     try {
       const { data } = await api.get(`/session/${sessionId}`);
       const serverFiles = data.files ?? [];
-      setFiles(serverFiles.length > 0 ? serverFiles : MOCK_FILES);
+      setFiles(serverFiles);
     } catch {
-      setFiles(MOCK_FILES);
+      setFiles([]);
     } finally {
       setLoading(false);
     }
@@ -66,7 +61,7 @@ export default function SessionFilesScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.backIcon}>{'<'}</Text>
+          <Ionicons name="chevron-back" size={22} color={INK} />
         </Pressable>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Session Files</Text>

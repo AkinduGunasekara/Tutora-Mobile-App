@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 
 // WiFi IP for physical device testing — update if your network changes
-const DEV_IP = '10.224.190.121';
+const DEV_IP = '192.168.8.156';
 
 // On web the browser is on the same machine, so use localhost
 const BASE_URL =
@@ -13,7 +13,7 @@ const BASE_URL =
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 

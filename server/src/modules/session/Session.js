@@ -4,6 +4,7 @@ const attachmentSchema = new mongoose.Schema({
   name:       { type: String, required: true },
   type:       { type: String, enum: ['document', 'image', 'code', 'video', 'pdf'] },
   uri:        { type: String, default: '' },
+  size:       { type: Number, default: 0 }, // bytes
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   uploadedAt: { type: Date, default: Date.now },
 }, { _id: false });

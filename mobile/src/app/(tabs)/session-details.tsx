@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -33,6 +34,7 @@ export default function SessionDetailsScreen() {
     dateLabel?: string;
     time?: string;
     duration?: string;
+    tutorId?: string;
     tutorName?: string;
     tutorSubtitle?: string;
     rating?: string;
@@ -54,10 +56,10 @@ export default function SessionDetailsScreen() {
   const dateLabel = asText(params.dateLabel, 'Wed, Oct 14, 2026');
   const time = asText(params.time, '10:00 AM');
   const duration = asText(params.duration, '1 HR');
-  const tutorName = asText(params.tutorName, 'Anjana Gayantha');
+  const tutorName = asText(params.tutorName, 'Tutor');
   const tutorSubtitle = asText(params.tutorSubtitle, 'Software Engineer at SLIIT');
-  const rating = asText(params.rating, '4.9');
-  const reviewCount = asText(params.reviewCount, '124');
+  const rating = asText(params.rating, '0');
+  const reviewCount = asText(params.reviewCount, '0');
   const hourlyRate = asText(params.hourlyRate, 'Rs 1,000/Hr');
   const tutorInitials = asText(params.tutorInitials, 'AG');
 
@@ -71,6 +73,7 @@ export default function SessionDetailsScreen() {
         duration,
         meetingType,
         message,
+        tutorId: params.tutorId,
         tutorName,
         tutorSubtitle,
         rating,
@@ -93,6 +96,7 @@ export default function SessionDetailsScreen() {
         durationMinutes: String(durationToMinutes(duration)),
         meetingType,
         message,
+        tutorId: params.tutorId,
         tutorName,
         tutorSubtitle,
         rating,
@@ -107,10 +111,11 @@ export default function SessionDetailsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back to date and time" onPress={backToSchedule} hitSlop={10}>
-            <Text style={styles.back}>‹</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back to date and time" onPress={backToSchedule} hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
           </Pressable>
           <Text style={styles.headerTitle}>Session Details</Text>
+          <View style={{ width: 22 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -187,17 +192,8 @@ export default function SessionDetailsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAGE },
   page: { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', backgroundColor: PAGE },
-  header: {
-    height: 52,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E4E1D2',
-  },
-  back: { color: INK, fontSize: 32, lineHeight: 36, width: 20 },
-  headerTitle: { color: INK, fontSize: 16, fontWeight: '700' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E4E1D2', gap: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: INK, flex: 1, textAlign: 'center' },
   content: { padding: 16, paddingBottom: 20, gap: 14 },
   tutorCard: {
     minHeight: 68,
@@ -234,9 +230,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    borderRadius: 16,
     paddingHorizontal: 11,
     gap: 9,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   calendarIconWrap: {
     width: 29,
@@ -250,7 +253,7 @@ const styles = StyleSheet.create({
   dateInfo: { flex: 1, gap: 2 },
   dateText: { color: INK, fontSize: 11, fontWeight: '700' },
   durationText: { color: MUTED, fontSize: 10 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 11 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   sectionTitle: { color: INK, fontSize: 12, fontWeight: '700', marginBottom: 8 },
   meetingToggle: {
     minHeight: 34,
@@ -275,13 +278,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     padding: 9,
   },
-  continueButton: {
-    minHeight: 44,
-    borderRadius: 9,
-    backgroundColor: TEAL,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  continueButton: { backgroundColor: TEAL, borderRadius: 23, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+  continueText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
   pressed: { opacity: 0.82 },
 });

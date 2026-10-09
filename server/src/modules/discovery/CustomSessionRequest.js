@@ -38,9 +38,27 @@ const customSessionRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'accepted', 'rejected', 'cancelled'],
+      enum: ['pending', 'accepted', 'rejected', 'cancelled', 'alternative_proposed'],
       default: 'pending',
     },
+
+    // Optional details shown on the tutor's Request Details screen
+    academicLevel: { type: String, default: '' },
+    learningObjective: { type: String, default: '' },
+    preferredFormat: { type: String, enum: ['', 'Online', 'In-Person'], default: '' },
+
+    // Tutor responses
+    declineReason: { type: String, default: '' },
+    alternative: {
+      type: new mongoose.Schema({
+        sessionDate: { type: Date, required: true },
+        startTime: { type: String, required: true },
+        note: { type: String, default: '' },
+        proposedAt: { type: Date, default: Date.now },
+      }, { _id: false }),
+      default: null,
+    },
+    booking: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', default: null },
   },
   { timestamps: true }
 );

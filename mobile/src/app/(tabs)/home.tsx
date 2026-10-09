@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -31,20 +32,12 @@ interface Tutor {
   subjects?: string[];
   hourlyRate?: number;
   rating?: number;
+  reviewCount?: number;
   isVerified?: boolean;
   avatar?: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const SUBJECTS = [
-  { name: 'Programming' },
-  { name: 'Mathematics' },
-  { name: 'Chemistry' },
-  { name: 'Data Science' },
-  { name: 'Physics' },
-  { name: 'English' },
-];
 
 const AVATAR_COLORS = ['#667EEA', '#F093FB', '#4FACFE', '#43E97B', '#FA709A', '#FDB863'];
 
@@ -65,6 +58,21 @@ function avatarColor(id: string) {
   let n = 0;
   for (let i = 0; i < id.length; i++) n += id.charCodeAt(i);
   return AVATAR_COLORS[n % AVATAR_COLORS.length];
+}
+
+function getSubjectIcon(subject: string): keyof typeof Ionicons.glyphMap {
+  const s = subject.toLowerCase();
+  if (s.includes('math') || s.includes('calculus') || s.includes('algebra')) return 'calculator';
+  if (s.includes('science') || s.includes('physics') || s.includes('chemistry') || s.includes('biology')) return 'flask';
+  if (s.includes('english') || s.includes('literature') || s.includes('writing') || s.includes('reading')) return 'book';
+  if (s.includes('language') || s.includes('spanish') || s.includes('french') || s.includes('german')) return 'language';
+  if (s.includes('history') || s.includes('social') || s.includes('geography')) return 'time';
+  if (s.includes('music') || s.includes('piano') || s.includes('guitar')) return 'musical-notes';
+  if (s.includes('art') || s.includes('drawing') || s.includes('painting')) return 'color-palette';
+  if (s.includes('computer') || s.includes('programming') || s.includes('coding') || s.includes('tech')) return 'code-slash';
+  if (s.includes('business') || s.includes('economics') || s.includes('finance')) return 'trending-up';
+  if (s.includes('physical') || s.includes('sports') || s.includes('fitness')) return 'fitness';
+  return 'library';
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -106,6 +114,18 @@ export default function HomeScreen() {
   const firstName = user.name.split(' ')[0];
   const isStudent = user.role !== 'tutor';
 
+  // Collect unique subjects from all fetched tutors
+  const subjects = Array.from(
+    new Set(tutors.flatMap((t) => t.subjects ?? []))
+  )
+  .filter((subject) => {
+    // Keep only "Chemistry", remove other chemistry variations
+    const s = subject.toLowerCase();
+    if (s.includes('chemistry') && s !== 'chemistry') return false;
+    return true;
+  })
+  .slice(0, 10);
+
   function handleBook(tutor: Tutor) {
     router.push({
       pathname: '/(tabs)/schedule' as any,
@@ -113,8 +133,8 @@ export default function HomeScreen() {
         tutorId:       tutor._id,
         tutorName:     tutor.name,
         tutorSubtitle: tutor.subjects?.[0] ?? 'General',
-        rating:        '4.8',
-        reviewCount:   '0',
+        rating:        String(tutor.rating ?? 0),
+        reviewCount:   String(tutor.reviewCount ?? 0),
         hourlyRate:    String(tutor.hourlyRate ?? 0),
         tutorInitials: getInitials(tutor.name),
         subject:       tutor.subjects?.[0] ?? 'General',
@@ -129,11 +149,13 @@ export default function HomeScreen() {
         <View>
           <Text style={styles.logoText}>TUTORA</Text>
         </View>
-        <View style={styles.headerRight}>
+        <Pressable
+          style={styles.headerRight}
+          onPress={() => router.push('/(tabs)/profile' as any)}>
           <View style={styles.headerAvatar}>
             <Text style={styles.headerAvatarText}>{getInitials(user.name)}</Text>
           </View>
-        </View>
+        </Pressable>
       </View>
 
       <ScrollView
@@ -176,23 +198,33 @@ export default function HomeScreen() {
           </Pressable>
         )}
 
-        {/* ── Popular Subjects ──────────────────────────────── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>POPULAR SUBJECTS</Text>
-            <Pressable><Text style={styles.seeAll}>See All</Text></Pressable>
+        {/* ── Browse by Subject ──────────────────────────────── */}
+        {subjects.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>BROWSE BY SUBJECT</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.subjectsRow}>
+              {subjects.map((name) => (
+                <Pressable
+                  key={name}
+                  style={styles.subjectChip}
+                  onPress={() => router.push({
+                    pathname: '/(tabs)/search' as any,
+                    params: { subject: name },
+                  })}>
+                  <View style={styles.subjectIconContainer}>
+                    <Ionicons name={getSubjectIcon(name)} size={20} color={INK} />
+                  </View>
+                  <Text style={styles.subjectName}>{name}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subjectsRow}>
-            {SUBJECTS.map((s) => (
-              <Pressable key={s.name} style={styles.subjectChip}>
-                <Text style={styles.subjectName}>{s.name}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
+        )}
 
         {/* ── Top Tutors ────────────────────────────────────── */}
         <View style={styles.section}>
@@ -310,6 +342,13 @@ const styles = StyleSheet.create({
   subjectChip: {
     backgroundColor: CARD, borderRadius: 8,
     paddingHorizontal: 14, paddingVertical: 10,
+    borderWidth: 1, borderColor: '#E4E1D2',
+    alignItems: 'center', gap: 6,
+  },
+  subjectIconContainer: {
+    width: 36, height: 36, borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: '#E4E1D2',
   },
   subjectName: { fontSize: 12, fontWeight: '600', color: INK },

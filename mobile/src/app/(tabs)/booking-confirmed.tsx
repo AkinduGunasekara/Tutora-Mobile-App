@@ -52,7 +52,7 @@ export default function BookingConfirmedScreen() {
   const time = asText(params.time, '10:00 AM');
   const duration = asText(params.duration, '1 HR');
   const meetingType = asText(params.meetingType, 'Microsoft Teams');
-  const tutorName = asText(params.tutorName, 'Anjana Gayantha');
+  const tutorName = asText(params.tutorName, 'Tutor');
   const tutorId = asText(params.tutorId, '');
   const subject = asText(params.subject, 'General');
   const hourlyRate = asText(params.hourlyRate, '0');
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   title: { color: INK, fontSize: 19, fontWeight: '800', textAlign: 'center' },
   bookingId: { color: TEAL, fontSize: 11, fontWeight: '700' },
   subtitle: { color: MUTED, fontSize: 10, textAlign: 'center', maxWidth: 270, lineHeight: 14 },
-  detailsCard: { backgroundColor: '#FFFFFF', borderRadius: 12, padding: 13 },
+  detailsCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   row: { minHeight: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   label: { color: MUTED, fontSize: 10 },
   value: { color: INK, fontSize: 10, fontWeight: '600', textAlign: 'right', flexShrink: 1 },
@@ -147,11 +147,11 @@ const styles = StyleSheet.create({
   statusBadge: { borderColor: TEAL, borderWidth: 1, borderRadius: 12, paddingHorizontal: 8, paddingVertical: 2, backgroundColor: '#E1F4EF' },
   statusText: { color: TEAL, fontSize: 9, fontWeight: '700' },
   actions: { gap: 9 },
-  calendarButton: { minHeight: 44, borderRadius: 9, backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center' },
-  primaryButtonText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
-  paymentButton: { minHeight: 40, borderRadius: 9, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
-  paymentButtonText: { color: TEAL, fontSize: 12, fontWeight: '700' },
-  homeButton: { minHeight: 40, borderRadius: 9, borderWidth: 1.5, borderColor: TEAL, backgroundColor: PAGE, alignItems: 'center', justifyContent: 'center' },
-  homeButtonText: { color: TEAL, fontSize: 12, fontWeight: '700' },
+  calendarButton: { backgroundColor: TEAL, borderRadius: 23, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+  primaryButtonText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
+  paymentButton: { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: TEAL, borderRadius: 23, minHeight: 46, alignItems: 'center', justifyContent: 'center' },
+  paymentButtonText: { color: TEAL, fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
+  homeButton: { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: TEAL, borderRadius: 23, minHeight: 46, alignItems: 'center', justifyContent: 'center' },
+  homeButtonText: { color: TEAL, fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
   pressed: { opacity: 0.82 },
 });

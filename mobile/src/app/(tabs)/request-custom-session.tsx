@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   TextInput,
   Alert,
@@ -14,6 +14,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import api from '@/lib/api';
+
+const PAGE = '#EFEDDC';
+const INK = '#171943';
+const TEAL = '#008C91';
+const MUTED = '#78809A';
+const CARD = '#FFFFFF';
 
 interface Tutor {
   _id: string;
@@ -37,6 +43,9 @@ export default function RequestCustomSessionScreen() {
   const [duration, setDuration] = useState('1');
   const [description, setDescription] = useState('');
   const [estimatedBudget, setEstimatedBudget] = useState('');
+  const [academicLevel, setAcademicLevel] = useState('');
+  const [learningObjective, setLearningObjective] = useState('');
+  const [preferredFormat, setPreferredFormat] = useState<'Online' | 'In-Person'>('Online');
 
   useEffect(() => {
     fetchTutor();
@@ -71,10 +80,13 @@ export default function RequestCustomSessionScreen() {
         duration: parseFloat(duration),
         description,
         estimatedBudget: parseFloat(estimatedBudget),
+        academicLevel,
+        learningObjective,
+        preferredFormat,
       });
 
       router.push({
-        pathname: '/request-sent',
+        pathname: '/(tabs)/request-sent',
         params: {
           tutorName: tutor?.name,
           subject,
@@ -96,7 +108,7 @@ export default function RequestCustomSessionScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#008C91" />
+          <ActivityIndicator size="large" color={TEAL} />
         </View>
       </SafeAreaView>
     );
@@ -105,11 +117,11 @@ export default function RequestCustomSessionScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
-        </TouchableOpacity>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <Ionicons name="chevron-back" size={22} color={INK} />
+        </Pressable>
         <Text style={styles.headerTitle}>Request Custom Session</Text>
-        <View style={{ width: 24 }} />
+        <View style={{ width: 22 }} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -142,6 +154,7 @@ export default function RequestCustomSessionScreen() {
             <TextInput
               style={styles.input}
               placeholder="e.g., Data Structures in Python"
+              placeholderTextColor={MUTED}
               value={subject}
               onChangeText={setSubject}
             />
@@ -152,6 +165,7 @@ export default function RequestCustomSessionScreen() {
             <TextInput
               style={styles.input}
               placeholder="YYYY-MM-DD"
+              placeholderTextColor={MUTED}
               value={preferredDate}
               onChangeText={setPreferredDate}
             />
@@ -162,6 +176,7 @@ export default function RequestCustomSessionScreen() {
             <TextInput
               style={styles.input}
               placeholder="e.g., 10:00 AM"
+              placeholderTextColor={MUTED}
               value={preferredTime}
               onChangeText={setPreferredTime}
             />
@@ -172,9 +187,47 @@ export default function RequestCustomSessionScreen() {
             <TextInput
               style={styles.input}
               placeholder="1"
+              placeholderTextColor={MUTED}
               value={duration}
               onChangeText={setDuration}
               keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.label}>Academic Level</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., 2nd Year Undergraduate"
+              placeholderTextColor={MUTED}
+              value={academicLevel}
+              onChangeText={setAcademicLevel}
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.label}>Preferred Format</Text>
+            <View style={styles.formatRow}>
+              {(['Online', 'In-Person'] as const).map((f) => (
+                <Pressable
+                  key={f}
+                  style={[styles.formatOption, preferredFormat === f && styles.formatOptionActive]}
+                  onPress={() => setPreferredFormat(f)}
+                >
+                  <Text style={[styles.formatOptionText, preferredFormat === f && styles.formatOptionTextActive]}>{f}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.label}>Learning Objective</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., Prepare for mid-term assessment"
+              placeholderTextColor={MUTED}
+              value={learningObjective}
+              onChangeText={setLearningObjective}
             />
           </View>
 
@@ -183,6 +236,7 @@ export default function RequestCustomSessionScreen() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Explain your learning goals..."
+              placeholderTextColor={MUTED}
               value={description}
               onChangeText={setDescription}
               multiline
@@ -195,6 +249,7 @@ export default function RequestCustomSessionScreen() {
             <TextInput
               style={styles.input}
               placeholder="1000"
+              placeholderTextColor={MUTED}
               value={estimatedBudget}
               onChangeText={setEstimatedBudget}
               keyboardType="numeric"
@@ -204,17 +259,17 @@ export default function RequestCustomSessionScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity
+        <Pressable
           style={styles.submitButton}
           onPress={handleSubmit}
           disabled={submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={CARD} />
           ) : (
-            <Text style={styles.submitButtonText}>Send Request</Text>
+            <Text style={styles.submitButtonText}>SEND REQUEST</Text>
           )}
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -223,7 +278,7 @@ export default function RequestCustomSessionScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
   },
   loadingContainer: {
     flex: 1,
@@ -232,16 +287,20 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E1D2',
+    gap: 10,
+    backgroundColor: CARD,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 17,
+    fontWeight: '800',
+    color: INK,
+    flex: 1,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -250,9 +309,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     padding: 20,
     marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E1D2',
   },
   tutorAvatar: {
     width: 56,
@@ -265,12 +326,12 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   avatarPlaceholder: {
-    backgroundColor: '#008C91',
+    backgroundColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
+    color: CARD,
     fontSize: 18,
     fontWeight: '700',
   },
@@ -280,7 +341,7 @@ const styles = StyleSheet.create({
   tutorName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
     marginBottom: 4,
   },
   tutorRating: {
@@ -291,48 +352,88 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1A1A2E',
+    color: INK,
   },
   form: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     padding: 20,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   formSection: {
     marginBottom: 20,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A2E',
+    fontSize: 13,
+    fontWeight: '700',
+    color: INK,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 16,
-    color: '#1A1A2E',
+    fontSize: 15,
+    color: INK,
+    borderWidth: 1,
+    borderColor: '#E4E1D2',
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
+  formatRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  formatOption: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: '#E4E1D2',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: PAGE,
+  },
+  formatOptionActive: {
+    borderColor: TEAL,
+    backgroundColor: '#E1F4EF',
+  },
+  formatOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: MUTED,
+  },
+  formatOptionTextActive: {
+    color: TEAL,
+  },
   footer: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: '#E4E1D2',
   },
   submitButton: {
-    backgroundColor: '#008C91',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: CARD,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -46,6 +47,7 @@ export default function BookingSummaryScreen() {
     duration?: string;
     meetingType?: string;
     message?: string;
+    tutorId?: string;
     tutorName?: string;
     tutorSubtitle?: string;
     rating?: string;
@@ -56,17 +58,16 @@ export default function BookingSummaryScreen() {
   }>();
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [bookingId, setBookingId] = useState('');
 
   const dateLabel = asText(params.dateLabel, 'Wed, Oct 14, 2026');
   const time = asText(params.time, '10:00 AM');
   const duration = asText(params.duration, '1 HR');
   const meetingType = asText(params.meetingType, 'Microsoft Teams');
   const message = asText(params.message, '');
-  const tutorName = asText(params.tutorName, 'Anjana Gayantha');
+  const tutorName = asText(params.tutorName, 'Tutor');
   const tutorSubtitle = asText(params.tutorSubtitle, 'Software Engineer at SLIIT');
-  const rating = asText(params.rating, '4.9');
-  const reviewCount = asText(params.reviewCount, '124');
+  const rating = asText(params.rating, '0');
+  const reviewCount = asText(params.reviewCount, '0');
   const hourlyRate = asText(params.hourlyRate, 'Rs 1,000/Hr');
   const tutorInitials = asText(params.tutorInitials, 'AG');
   const existingBookingId = asText(params.bookingId, '');
@@ -83,7 +84,7 @@ export default function BookingSummaryScreen() {
   const meetingLabel = meetingType === 'Microsoft Teams' ? 'Microsoft Teams Meeting' : meetingType;
 
   const confirmBooking = async () => {
-    if (submitting || bookingId) return;
+    if (submitting) return;
     setSubmitting(true);
     setErrorMessage('');
 
@@ -100,6 +101,7 @@ export default function BookingSummaryScreen() {
         : await api.post('/bookings', {
           ...bookingPayload,
           tutor: {
+            userId: asText(params.tutorId, '') || undefined,
             name: tutorName,
             subtitle: tutorSubtitle,
             initials: tutorInitials,
@@ -108,9 +110,8 @@ export default function BookingSummaryScreen() {
             hourlyRate: hourlyAmount,
           },
         });
-      const savedId = String(data.booking?.id ?? data.booking?._id ?? existingBookingId);
-      setBookingId(savedId);
-      router.push({
+      const savedId = String(data.booking?.id ?? data.booking?._id ?? '');
+      router.replace({
         pathname: '/(tabs)/booking-confirmed' as any,
         params: {
           bookingId: savedId,
@@ -125,7 +126,6 @@ export default function BookingSummaryScreen() {
       });
     } catch (error: any) {
       setErrorMessage(error?.response?.data?.message ?? 'Could not save your booking. Please try again.');
-    } finally {
       setSubmitting(false);
     }
   };
@@ -155,10 +155,11 @@ export default function BookingSummaryScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.page}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back to session details" onPress={backToSessionDetails} hitSlop={10}>
-            <Text style={styles.back}>‹</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back to session details" onPress={backToSessionDetails} hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
           </Pressable>
           <Text style={styles.headerTitle}>Booking Summary</Text>
+          <View style={{ width: 22 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -203,22 +204,15 @@ export default function BookingSummaryScreen() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityState={{ disabled: submitting || Boolean(bookingId) }}
-            disabled={submitting || Boolean(bookingId)}
+            accessibilityState={{ disabled: submitting }}
+            disabled={submitting}
             onPress={confirmBooking}
-            style={({ pressed }) => [styles.confirmButton, pressed && styles.pressed, (submitting || bookingId) && styles.confirmButtonDisabled]}>
+            style={({ pressed }) => [styles.confirmButton, pressed && styles.pressed, submitting && styles.confirmButtonDisabled]}>
             {submitting
               ? <ActivityIndicator color="#FFFFFF" />
-              : <Text style={styles.confirmText}>{bookingId ? 'Booking Request Sent' : existingBookingId ? 'Confirm Reschedule' : 'Confirm Booking'}</Text>}
+              : <Text style={styles.confirmText}>{existingBookingId ? 'Confirm Reschedule' : 'Confirm Booking'}</Text>}
           </Pressable>
           {errorMessage ? <Text accessibilityLiveRegion="polite" style={styles.errorText}>{errorMessage}</Text> : null}
-          {bookingId ? (
-            <View accessibilityLiveRegion="polite" style={styles.successCard}>
-              <Text style={styles.successTitle}>Booking saved</Text>
-              <Text style={styles.successText}>Request ID: {bookingId}</Text>
-              <Text style={styles.successText}>Status: Pending tutor confirmation</Text>
-            </View>
-          ) : null}
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -247,17 +241,8 @@ function SummaryRow({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAGE },
   page: { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', backgroundColor: PAGE },
-  header: {
-    height: 52,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E4E1D2',
-  },
-  back: { color: INK, fontSize: 32, lineHeight: 36, width: 20 },
-  headerTitle: { color: INK, fontSize: 16, fontWeight: '700' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E4E1D2', gap: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: INK, flex: 1, textAlign: 'center' },
   content: { padding: 16, paddingBottom: 20, gap: 14 },
   tutorCard: {
     minHeight: 68,
@@ -289,7 +274,7 @@ const styles = StyleSheet.create({
   rating: { color: INK, fontSize: 10, fontWeight: '700' },
   reviews: { color: INK, fontSize: 10 },
   rate: { color: TEAL, fontSize: 11, fontWeight: '800' },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 11 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   sectionTitle: { color: INK, fontSize: 12, fontWeight: '700', marginBottom: 8 },
   summaryRow: { minHeight: 21, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   rowLabel: { color: MUTED, fontSize: 10 },
@@ -299,18 +284,9 @@ const styles = StyleSheet.create({
   messageText: { color: INK, fontSize: 10, lineHeight: 16 },
   freeText: { color: TEAL },
   divider: { height: 1, backgroundColor: '#E6E6E6', marginVertical: 4 },
-  confirmButton: {
-    minHeight: 44,
-    borderRadius: 9,
-    backgroundColor: TEAL,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  confirmButton: { backgroundColor: TEAL, borderRadius: 23, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
   confirmButtonDisabled: { opacity: 0.75 },
-  confirmText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  confirmText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
   errorText: { color: '#B42318', fontSize: 12, textAlign: 'center' },
-  successCard: { backgroundColor: '#E1F4EF', borderRadius: 10, padding: 12, gap: 4 },
-  successTitle: { color: INK, fontWeight: '700', fontSize: 13 },
-  successText: { color: INK, fontSize: 11 },
   pressed: { opacity: 0.82 },
 });

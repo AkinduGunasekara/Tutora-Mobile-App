@@ -2,7 +2,7 @@ import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Alert, Pressable, StyleSheet, Text, View,
+  Pressable, StyleSheet, Text, View,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withTiming,
@@ -69,22 +69,12 @@ export default function SessionVideoScreen() {
   }, [sessionId]);
 
   const handleEndSession = () => {
-    Alert.alert(
-      'End Session',
-      'Are you sure you want to end this session? Payment will be released.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'End Session', style: 'destructive',
-          onPress: async () => {
-            setEnding(true);
-            if (timerRef.current) clearInterval(timerRef.current);
-            try { await api.patch(`/session/${sessionId}/complete`); } catch {}
-            router.replace({ pathname: '/(tabs)/session-completed' as any, params: { sessionId } });
-          },
-        },
-      ]
-    );
+    if (ending) return;
+    setEnding(true);
+    if (timerRef.current) clearInterval(timerRef.current);
+    // Fire-and-forget — navigate immediately, complete in background
+    api.patch(`/session/${sessionId}/complete`).catch(() => {});
+    router.replace({ pathname: '/(tabs)/session-completed' as any, params: { sessionId } });
   };
 
   const toggleCam = () => {

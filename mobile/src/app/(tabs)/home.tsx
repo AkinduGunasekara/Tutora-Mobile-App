@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -59,6 +60,21 @@ function avatarColor(id: string) {
   return AVATAR_COLORS[n % AVATAR_COLORS.length];
 }
 
+function getSubjectIcon(subject: string): keyof typeof Ionicons.glyphMap {
+  const s = subject.toLowerCase();
+  if (s.includes('math') || s.includes('calculus') || s.includes('algebra')) return 'calculator';
+  if (s.includes('science') || s.includes('physics') || s.includes('chemistry') || s.includes('biology')) return 'flask';
+  if (s.includes('english') || s.includes('literature') || s.includes('writing') || s.includes('reading')) return 'book';
+  if (s.includes('language') || s.includes('spanish') || s.includes('french') || s.includes('german')) return 'language';
+  if (s.includes('history') || s.includes('social') || s.includes('geography')) return 'time';
+  if (s.includes('music') || s.includes('piano') || s.includes('guitar')) return 'musical-notes';
+  if (s.includes('art') || s.includes('drawing') || s.includes('painting')) return 'color-palette';
+  if (s.includes('computer') || s.includes('programming') || s.includes('coding') || s.includes('tech')) return 'code-slash';
+  if (s.includes('business') || s.includes('economics') || s.includes('finance')) return 'trending-up';
+  if (s.includes('physical') || s.includes('sports') || s.includes('fitness')) return 'fitness';
+  return 'library';
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
@@ -101,7 +117,14 @@ export default function HomeScreen() {
   // Collect unique subjects from all fetched tutors
   const subjects = Array.from(
     new Set(tutors.flatMap((t) => t.subjects ?? []))
-  ).slice(0, 10);
+  )
+  .filter((subject) => {
+    // Keep only "Chemistry", remove other chemistry variations
+    const s = subject.toLowerCase();
+    if (s.includes('chemistry') && s !== 'chemistry') return false;
+    return true;
+  })
+  .slice(0, 10);
 
   function handleBook(tutor: Tutor) {
     router.push({
@@ -193,6 +216,9 @@ export default function HomeScreen() {
                     pathname: '/(tabs)/search' as any,
                     params: { subject: name },
                   })}>
+                  <View style={styles.subjectIconContainer}>
+                    <Ionicons name={getSubjectIcon(name)} size={20} color={INK} />
+                  </View>
                   <Text style={styles.subjectName}>{name}</Text>
                 </Pressable>
               ))}
@@ -316,6 +342,13 @@ const styles = StyleSheet.create({
   subjectChip: {
     backgroundColor: CARD, borderRadius: 8,
     paddingHorizontal: 14, paddingVertical: 10,
+    borderWidth: 1, borderColor: '#E4E1D2',
+    alignItems: 'center', gap: 6,
+  },
+  subjectIconContainer: {
+    width: 36, height: 36, borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: '#E4E1D2',
   },
   subjectName: { fontSize: 12, fontWeight: '600', color: INK },

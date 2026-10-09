@@ -264,7 +264,7 @@ export default function HomeScreen() {
                   {(t.rating ?? 0) > 0 && (
                     <Text style={styles.tutorRating}>★ {t.rating!.toFixed(1)}</Text>
                   )}
-                  {(t.hourlyRate ?? 0) > 0 && (
+                  {t.hourlyRate !== undefined && (
                     <Text style={styles.tutorRate}>LKR {t.hourlyRate}/hr</Text>
                   )}
                   <Pressable

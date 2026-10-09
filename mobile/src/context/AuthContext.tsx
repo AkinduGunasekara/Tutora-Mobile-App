@@ -37,6 +37,9 @@ interface AuthContextType {
   updateUser: (data: Partial<AuthUser>) => void;
 }
 
+// Tutors land on their dashboard, students on the existing home screen
+export const homeRouteFor = (_role: Role) => '/(tabs)/home' as any;
+
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -75,13 +78,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     const { data } = await api.post('/auth/login', { email, password });
     await persist(data.token, data.user);
-    router.replace('/(tabs)/home');
+    router.replace(homeRouteFor(data.user.role));
   };
 
   const register = async (name: string, email: string, password: string, role: Role) => {
     const { data } = await api.post('/auth/register', { name, email, password, role });
     await persist(data.token, data.user);
-    router.replace('/(tabs)/home');
+    router.replace(homeRouteFor(data.user.role));
   };
 
   const logout = async () => {

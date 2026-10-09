@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Image,
   ActivityIndicator,
@@ -12,6 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import api from '@/lib/api';
+
+const PAGE = '#EFEDDC';
+const INK = '#171943';
+const TEAL = '#008C91';
+const MUTED = '#78809A';
+const CARD = '#FFFFFF';
 
 interface Review {
   _id: string;
@@ -77,7 +83,7 @@ export default function TutorReviewsScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#008C91" />
+          <ActivityIndicator size="large" color={TEAL} />
         </View>
       </SafeAreaView>
     );
@@ -86,11 +92,11 @@ export default function TutorReviewsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A2E" />
-        </TouchableOpacity>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <Ionicons name="chevron-back" size={22} color={INK} />
+        </Pressable>
         <Text style={styles.headerTitle}>Ratings & Reviews</Text>
-        <View style={{ width: 24 }} />
+        <View style={{ width: 22 }} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -188,7 +194,7 @@ export default function TutorReviewsScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
   },
   loadingContainer: {
     flex: 1,
@@ -197,27 +203,32 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E1D2',
+    gap: 10,
+    backgroundColor: CARD,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontSize: 17,
+    fontWeight: '800',
+    color: INK,
+    flex: 1,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
   },
   summarySection: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     padding: 20,
     flexDirection: 'row',
     gap: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E4E1D2',
+    marginBottom: 12,
   },
   summaryLeft: {
     alignItems: 'center',
@@ -226,7 +237,7 @@ const styles = StyleSheet.create({
   averageRating: {
     fontSize: 48,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: INK,
   },
   summaryStars: {
     flexDirection: 'row',
@@ -234,8 +245,8 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   totalReviews: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: 13,
+    color: MUTED,
   },
   summaryRight: {
     flex: 1,
@@ -249,13 +260,13 @@ const styles = StyleSheet.create({
   },
   ratingBarLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: MUTED,
     width: 40,
   },
   ratingBarTrack: {
     flex: 1,
     height: 6,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E4E1D2',
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -266,24 +277,26 @@ const styles = StyleSheet.create({
   },
   ratingBarCount: {
     fontSize: 12,
-    color: '#6B7280',
+    color: MUTED,
     width: 24,
     textAlign: 'right',
   },
   reviewsSection: {
-    padding: 20,
+    padding: 16,
   },
   reviewsTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A2E',
-    marginBottom: 16,
+    fontSize: 16,
+    fontWeight: '800',
+    color: INK,
+    marginBottom: 12,
   },
   reviewCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: CARD,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -307,12 +320,12 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   avatarPlaceholder: {
-    backgroundColor: '#008C91',
+    backgroundColor: TEAL,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: '#FFFFFF',
+    color: CARD,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -322,7 +335,7 @@ const styles = StyleSheet.create({
   reviewerName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1A1A2E',
+    color: INK,
     marginBottom: 4,
   },
   reviewRating: {
@@ -331,7 +344,7 @@ const styles = StyleSheet.create({
   },
   reviewComment: {
     fontSize: 14,
-    color: '#4B5563',
+    color: MUTED,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -341,14 +354,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   reviewTag: {
-    backgroundColor: '#E8F5F5',
+    backgroundColor: '#E1F4EF',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   reviewTagText: {
     fontSize: 11,
-    color: '#008C91',
+    color: TEAL,
     fontWeight: '600',
   },
   noReviews: {
@@ -357,6 +370,6 @@ const styles = StyleSheet.create({
   },
   noReviewsText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: MUTED,
   },
 });

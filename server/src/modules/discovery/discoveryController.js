@@ -1,6 +1,8 @@
 const User = require('../auth/User');
 const Review = require('./Review');
 const CustomSessionRequest = require('./CustomSessionRequest');
+const { createBookingFromRequest } = require('../tutor/tutorService');
+const { attachTutorStats } = require('../../shared/tutorStats');
 
 // @desc    Search for tutors with filters
 // @route   GET /api/discovery/search
@@ -79,10 +81,11 @@ const searchTutors = async (req, res) => {
       });
     }
 
+    const withStats = await attachTutorStats(filteredTutors);
     res.json({
       success: true,
-      count: filteredTutors.length,
-      data: filteredTutors,
+      count: withStats.length,
+      data: withStats,
     });
   } catch (error) {
     console.error('Search tutors error:', error);
@@ -110,9 +113,10 @@ const getTutorProfile = async (req, res) => {
       });
     }
 
+    const [withStats] = await attachTutorStats([tutor]);
     res.json({
       success: true,
-      data: tutor,
+      data: withStats,
     });
   } catch (error) {
     console.error('Get tutor profile error:', error);
@@ -239,6 +243,9 @@ const createCustomSessionRequest = async (req, res) => {
       duration,
       description,
       estimatedBudget,
+      academicLevel,
+      learningObjective,
+      preferredFormat,
     } = req.body;
 
     const request = await CustomSessionRequest.create({
@@ -250,6 +257,9 @@ const createCustomSessionRequest = async (req, res) => {
       duration,
       description,
       estimatedBudget,
+      academicLevel: typeof academicLevel === 'string' ? academicLevel.trim() : '',
+      learningObjective: typeof learningObjective === 'string' ? learningObjective.trim() : '',
+      preferredFormat: ['Online', 'In-Person'].includes(preferredFormat) ? preferredFormat : '',
     });
 
     res.status(201).json({
@@ -289,7 +299,55 @@ const getCustomSessionRequests = async (req, res) => {
   }
 };
 
+// @desc    Get the logged-in student's own custom session requests
+// @route   GET /api/discovery/custom-session/mine
+// @access  Private (student)
+const getMyCustomSessionRequests = async (req, res) => {
+  try {
+    const requests = await CustomSessionRequest.find({ student: req.user._id })
+      .populate('tutor', 'name avatar subjects hourlyRate')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: requests });
+  } catch (error) {
+    console.error('Get my custom session requests error:', error);
+    res.status(500).json({ success: false, message: 'Server error while fetching your requests' });
+  }
+};
+
+// @desc    Student accepts or declines an alternative time proposed by the tutor
+// @route   PATCH /api/discovery/custom-session/:id/respond
+// @access  Private (student)
+const respondToAlternative = async (req, res) => {
+  try {
+    const request = await CustomSessionRequest.findOne({ _id: req.params.id, student: req.user._id });
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+    if (request.status !== 'alternative_proposed' || !request.alternative) {
+      return res.status(400).json({ success: false, message: 'There is no proposed time to respond to' });
+    }
+
+    if (req.body?.accept !== true) {
+      request.status = 'cancelled';
+      await request.save();
+      return res.json({ success: true, data: request });
+    }
+
+    // Accepting the tutor's time turns the request into a confirmed booking
+    request.preferredDate = request.alternative.sessionDate;
+    request.preferredTime = request.alternative.startTime;
+    const booking = await createBookingFromRequest(request);
+    res.json({ success: true, data: request, bookingId: booking._id });
+  } catch (error) {
+    console.error('Respond to alternative error:', error);
+    res.status(error.status || 500).json({
+      success: false,
+      message: error.status ? error.message : 'Server error while responding to the proposed time',
+    });
+  }
+};
+
 module.exports = {
+  getMyCustomSessionRequests,
+  respondToAlternative,
   searchTutors,
   getTutorProfile,
   getSubjects,

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -142,7 +143,7 @@ export default function SessionChatScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={10}>
-          <Text style={styles.backIcon}>{'<'}</Text>
+          <Ionicons name="chevron-back" size={22} color={INK} />
         </Pressable>
         <View style={styles.tutorAvatar}>
           <Text style={styles.tutorAvatarText}>{getInitials(tutorName)}</Text>

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
@@ -132,10 +133,11 @@ export default function RescheduleSessionScreen() {
             accessibilityRole="button"
             accessibilityLabel="Back to My Calendar"
             onPress={() => router.replace({ pathname: '/(tabs)/bookings' as any, params: { date: formatDateParam(currentSessionDate) } })}
-            hitSlop={10}>
-            <Text style={styles.back}>‹</Text>
+            hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
           </Pressable>
           <Text style={styles.headerTitle}>Reschedule Session</Text>
+          <View style={{ width: 22 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -222,18 +224,17 @@ const dateParamEqual = (date: Date, month: Date, day: number) =>
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAGE },
   page: { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', backgroundColor: PAGE },
-  header: { height: 52, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', gap: 16, borderBottomWidth: 1, borderBottomColor: '#E4E1D2' },
-  back: { color: INK, fontSize: 32, lineHeight: 36, width: 20 },
-  headerTitle: { color: INK, fontSize: 16, fontWeight: '700' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E4E1D2', gap: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: INK, flex: 1, textAlign: 'center' },
   content: { padding: 16, paddingBottom: 22, gap: 14 },
-  currentCard: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 12, gap: 5 },
+  currentCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, gap: 5 },
   currentLabel: { color: TEAL, fontSize: 9, fontWeight: '800' },
   currentTitle: { color: INK, fontSize: 12, fontWeight: '800' },
   currentMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   currentDate: { color: MUTED, fontSize: 10 },
   currentDuration: { color: INK, fontSize: 10, fontWeight: '700' },
   currentTutor: { color: MUTED, fontSize: 9 },
-  calendarCard: { backgroundColor: '#FFFFFF', borderRadius: 12, padding: 10 },
+  calendarCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 10, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   monthHeader: { height: 30, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 2 },
   monthTitle: { color: INK, fontSize: 12, fontWeight: '700' },
   monthArrow: { color: INK, fontSize: 24, lineHeight: 28, width: 22, textAlign: 'center' },
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
   currentDay: { backgroundColor: '#F0EFDF' },
   selectedDay: { backgroundColor: TEAL },
   selectedDayText: { color: '#FFFFFF', fontWeight: '700' },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 11 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
   sectionTitle: { color: INK, fontSize: 12, fontWeight: '700', marginBottom: 8 },
   timeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   timeButton: { width: '31.5%', minHeight: 32, borderRadius: 6, borderWidth: 1, borderColor: '#DFE1E7', alignItems: 'center', justifyContent: 'center' },
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
   selectedTimeText: { color: '#FFFFFF', fontWeight: '700' },
   reasonInput: { minHeight: 70, borderRadius: 6, borderWidth: 1, borderColor: '#E3E3E3', backgroundColor: '#F5F5F5', color: INK, fontSize: 10, padding: 9 },
   error: { color: '#B42318', fontSize: 11, textAlign: 'center' },
-  continueButton: { minHeight: 44, borderRadius: 9, backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center' },
-  continueText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  continueButton: { backgroundColor: TEAL, borderRadius: 23, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+  continueText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
   pressed: { opacity: 0.82 },
 });

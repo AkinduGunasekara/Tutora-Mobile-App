@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('./User');
+const { attachTutorStats } = require('../../shared/tutorStats');
 
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -86,9 +87,9 @@ exports.getMe = async (req, res) => {
 exports.getTutors = async (req, res) => {
   try {
     const tutors = await User.find({ role: 'tutor' })
-      .select('name bio subjects hourlyRate rating isVerified avatar')
+      .select('name bio subjects hourlyRate isVerified avatar onlineSessions faceToFaceSessions')
       .lean();
-    res.json(tutors);
+    res.json(await attachTutorStats(tutors));
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

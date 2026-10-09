@@ -1,7 +1,13 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+
+const PAGE = '#EFEDDC';
+const INK = '#171943';
+const TEAL = '#008C91';
+const MUTED = '#78809A';
+const CARD = '#FFFFFF';
 
 export default function RequestSentScreen() {
   const router = useRouter();
@@ -17,18 +23,18 @@ export default function RequestSentScreen() {
   } = params;
 
   const navigateToCalendar = () => {
-    router.push('/bookings');
+    router.push('/(tabs)/bookings');
   };
 
   const navigateToHome = () => {
-    router.push('/home');
+    router.push('/(tabs)/home');
   };
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         <View style={styles.iconContainer}>
-          <Ionicons name="checkmark-circle" size={80} color="#10B981" />
+          <Ionicons name="checkmark-circle" size={80} color={TEAL} />
         </View>
 
         <Text style={styles.title}>Request Sent!</Text>
@@ -64,25 +70,25 @@ export default function RequestSentScreen() {
         </View>
 
         <View style={styles.noteContainer}>
-          <Ionicons name="information-circle-outline" size={20} color="#6B7280" />
+          <Ionicons name="information-circle-outline" size={20} color={MUTED} />
           <Text style={styles.noteText}>
             The tutor will review your request and respond within 24 hours.
           </Text>
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity
+          <Pressable
             style={styles.primaryButton}
             onPress={navigateToCalendar}
           >
-            <Text style={styles.primaryButtonText}>View My Calendar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+            <Text style={styles.primaryButtonText}>VIEW MY CALENDAR</Text>
+          </Pressable>
+          <Pressable
             style={styles.secondaryButton}
             onPress={navigateToHome}
           >
-            <Text style={styles.secondaryButtonText}>Back to Home</Text>
-          </TouchableOpacity>
+            <Text style={styles.secondaryButtonText}>BACK TO HOME</Text>
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>
@@ -92,7 +98,7 @@ export default function RequestSentScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: PAGE,
   },
   container: {
     flex: 1,
@@ -105,24 +111,27 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#1A1A2E',
+    fontWeight: '800',
+    color: INK,
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: 15,
+    color: MUTED,
     textAlign: 'center',
     marginBottom: 32,
     paddingHorizontal: 20,
+    lineHeight: 22,
   },
   detailsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: CARD,
     borderRadius: 16,
     padding: 20,
     width: '100%',
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#EEEBDD',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -137,22 +146,22 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: '#6B7280',
+    color: MUTED,
   },
   detailValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1A1A2E',
+    color: INK,
   },
   detailDivider: {
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E4E1D2',
   },
   noteContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E1F4EF',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
@@ -162,34 +171,40 @@ const styles = StyleSheet.create({
   noteText: {
     flex: 1,
     fontSize: 13,
-    color: '#6B7280',
+    color: MUTED,
+    lineHeight: 18,
   },
   actions: {
     width: '100%',
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: '#008C91',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: CARD,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   secondaryButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 16,
-    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: TEAL,
+    borderRadius: 23,
+    minHeight: 46,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    justifyContent: 'center',
+    paddingVertical: 14,
   },
   secondaryButtonText: {
-    color: '#008C91',
-    fontSize: 16,
-    fontWeight: '700',
+    color: TEAL,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

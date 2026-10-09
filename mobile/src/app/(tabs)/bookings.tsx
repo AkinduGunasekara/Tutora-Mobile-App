@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import StudentProposals from '@/components/tutor/StudentProposals';
 
 const INK = '#171943';
 const TEAL = '#008C91';
@@ -208,7 +209,28 @@ export default function BookingsScreen() {
     }
   };
 
-  const handlePayAndJoin = (booking: Booking) => {
+  const handlePayAndJoin = async (booking: Booking) => {
+    // Already paid (simulated payment held in escrow) → go straight to the session
+    try {
+      const { data } = await api.get(`/session/by-booking/${booking._id}`);
+      if (data?.paymentStatus === 'in_escrow' || data?.paymentStatus === 'released') {
+        router.push({
+          pathname: '/(tabs)/session-booking-confirm' as any,
+          params: {
+            sessionId: data._id,
+            tutorName: booking.tutor.name,
+            subject: data.subject,
+            durationHours: String(data.durationHours),
+            hourlyRate: String(data.hourlyRate),
+            scheduledDate: data.scheduledDate,
+            paymentMethod: data.paymentMethod,
+          },
+        });
+        return;
+      }
+    } catch {
+      // no session yet → pay first
+    }
     router.push({
       pathname: '/(tabs)/payment-summary' as any,
       params: {
@@ -261,6 +283,9 @@ export default function BookingsScreen() {
               })}
             </View>
           </View>
+
+          {/* Tutor-proposed new times awaiting the student's approval */}
+          {!isTutor && <StudentProposals onChanged={loadBookings} />}
 
           {loading ? (
             <ActivityIndicator color={TEAL} style={styles.loading} />

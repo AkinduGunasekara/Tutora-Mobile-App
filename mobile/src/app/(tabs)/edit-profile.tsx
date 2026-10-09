@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -8,6 +9,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -17,6 +19,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { Primary, Spacing } from '@/constants/theme';
+
+const INK = '#171943';
 
 // ─── Reusable field ───────────────────────────────────────────────────────────
 function Field({
@@ -62,7 +66,7 @@ function Field({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#78809A"
           editable={editable}
           keyboardType={keyboardType}
           autoCapitalize="none"
@@ -87,6 +91,10 @@ export default function EditProfileScreen() {
   const [studentId, setStudentId] = useState(user?.studentId ?? '');
   const [bio, setBio] = useState(user?.bio ?? '');
   const [hourlyRate, setHourlyRate] = useState(String(user?.hourlyRate ?? ''));
+  const [subjects, setSubjects] = useState((user?.subjects ?? []).join(', '));
+  const [qualifications, setQualifications] = useState((user?.qualifications ?? []).join('\n'));
+  const [onlineSessions, setOnlineSessions] = useState(user?.onlineSessions ?? true);
+  const [faceToFaceSessions, setFaceToFaceSessions] = useState(user?.faceToFaceSessions ?? false);
 
   const initials = name
     .split(' ')
@@ -113,6 +121,10 @@ export default function EditProfileScreen() {
       } else {
         payload.bio = bio;
         payload.hourlyRate = hourlyRate ? Number(hourlyRate) : 0;
+        payload.subjects = subjects.split(',').map((x) => x.trim()).filter(Boolean);
+        payload.qualifications = qualifications.split('\n').map((x) => x.trim()).filter(Boolean);
+        payload.onlineSessions = onlineSessions;
+        payload.faceToFaceSessions = faceToFaceSessions;
       }
       const { data } = await api.put('/auth/profile', payload);
       updateUser(data);
@@ -133,8 +145,8 @@ export default function EditProfileScreen() {
 
         {/* ── Top bar ───────────────────────────────────── */}
         <View style={styles.topbar}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Text style={styles.backIcon}>←</Text>
+          <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
           </Pressable>
           <View style={styles.topbarCenter}>
             <Text style={styles.topbarTitle}>Edit Profile</Text>
@@ -286,6 +298,36 @@ export default function EditProfileScreen() {
                   keyboardType="numeric"
                   placeholder="e.g. 2500"
                 />
+                <View style={styles.fieldDivider} />
+                <Field
+                  label="Subjects I Teach (comma separated)"
+                  icon="📚"
+                  value={subjects}
+                  onChangeText={setSubjects}
+                  placeholder="e.g. Programming, Algorithms"
+                  keyboardType="default"
+                />
+                <View style={styles.fieldDivider} />
+                <Field
+                  label="Qualifications & Experience (one per line)"
+                  icon="🎓"
+                  value={qualifications}
+                  onChangeText={setQualifications}
+                  placeholder={'e.g. BSc Software Engineering\n2+ Years Tutoring Experience'}
+                  multiline
+                  inputHeight={88}
+                  keyboardType="default"
+                />
+                <View style={styles.fieldDivider} />
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>Online Sessions</Text>
+                  <Switch value={onlineSessions} onValueChange={setOnlineSessions} trackColor={{ false: '#E4E1D2', true: '#008C91' }} thumbColor="#FFFFFF" />
+                </View>
+                <View style={styles.fieldDivider} />
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>Face-to-Face Sessions</Text>
+                  <Switch value={faceToFaceSessions} onValueChange={setFaceToFaceSessions} trackColor={{ false: '#E4E1D2', true: '#008C91' }} thumbColor="#FFFFFF" />
+                </View>
               </View>
             </View>
           )}
@@ -317,7 +359,9 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F5F6FA' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
+  toggleLabel: { fontSize: 14, fontWeight: '600', color: '#171943' },
+  safe: { flex: 1, backgroundColor: '#EFEDDC' },
   scroll: {
     padding: Spacing.four,
     gap: Spacing.four,
@@ -332,7 +376,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E4E1D2',
     shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 4,
@@ -344,14 +388,13 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#E5E7EB',
+    borderColor: '#E4E1D2',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backIcon: { fontSize: 18, color: '#1A1A2E' },
   topbarCenter: { alignItems: 'center', flex: 1 },
-  topbarTitle: { fontSize: 16, fontWeight: '700', color: '#1A1A2E' },
-  topbarSub: { fontSize: 12, color: '#6B7280' },
+  topbarTitle: { fontSize: 16, fontWeight: '700', color: '#171943' },
+  topbarSub: { fontSize: 12, color: '#78809A' },
   saveBtn: {
     backgroundColor: Primary,
     borderRadius: 8,
@@ -397,7 +440,7 @@ const styles = StyleSheet.create({
   },
   cameraBtnIcon: { fontSize: 13 },
   changeAvatarLink: { color: Primary, fontSize: 14, fontWeight: '600' },
-  avatarHint: { fontSize: 12, color: '#9CA3AF' },
+  avatarHint: { fontSize: 12, color: '#78809A' },
 
   // Section
   section: { gap: Spacing.two },
@@ -409,7 +452,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#9CA3AF',
+    color: '#78809A',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
@@ -444,14 +487,14 @@ const styles = StyleSheet.create({
   },
   fieldDivider: {
     height: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E4E1D2',
     marginVertical: 4,
   },
 
   // Two-column layout
   twoCol: { flexDirection: 'row' },
   colLeft: { flex: 1 },
-  colDivider: { width: 1, backgroundColor: '#F3F4F6', marginVertical: 8 },
+  colDivider: { width: 1, backgroundColor: '#E4E1D2', marginVertical: 8 },
   colRight: { flex: 1, paddingLeft: Spacing.two },
 
   // Field
@@ -459,27 +502,27 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#6B7280',
+    color: '#78809A',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F6FA',
+    backgroundColor: '#EFEDDC',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E4E1D2',
     paddingHorizontal: 12,
     marginTop: 2,
   },
   inputDisabled: { backgroundColor: '#F9FAFB' },
-  inputIcon: { fontSize: 15, marginRight: 8, color: '#9CA3AF' },
+  inputIcon: { fontSize: 15, marginRight: 8, color: '#78809A' },
   input: {
     flex: 1,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#1A1A2E',
+    color: '#171943',
   },
   inputSuffix: { fontSize: 12, color: Primary, fontWeight: '600' },
 
@@ -498,5 +541,5 @@ const styles = StyleSheet.create({
   },
   saveChangesBtnText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
   cancelBtn: { alignItems: 'center', paddingVertical: 12 },
-  cancelBtnText: { color: '#9CA3AF', fontSize: 14, fontWeight: '600' },
+  cancelBtnText: { color: '#78809A', fontSize: 14, fontWeight: '600' },
 });

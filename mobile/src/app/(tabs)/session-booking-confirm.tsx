@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -80,7 +81,7 @@ export default function SessionBookingConfirmScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.backIcon}>{'<'}</Text>
+          <Ionicons name="chevron-back" size={22} color={INK} />
         </Pressable>
         <Text style={styles.headerTitle}>Booking Confirmed</Text>
         <View style={styles.confirmedPill}>

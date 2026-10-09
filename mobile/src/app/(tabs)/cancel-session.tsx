@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -107,10 +108,11 @@ export default function CancelSessionScreen() {
             accessibilityRole="button"
             accessibilityLabel="Back to My Calendar"
             onPress={() => router.replace({ pathname: '/(tabs)/bookings' as any, params: { date } })}
-            hitSlop={10}>
-            <Text style={styles.back}>‹</Text>
+            hitSlop={8}>
+            <Ionicons name="chevron-back" size={22} color={INK} />
           </Pressable>
           <Text style={styles.headerTitle}>Cancel Session</Text>
+          <View style={{ width: 22 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -168,11 +170,10 @@ export default function CancelSessionScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PAGE },
   page: { flex: 1, width: '100%', maxWidth: 560, alignSelf: 'center', backgroundColor: PAGE },
-  header: { height: 52, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', gap: 16, borderBottomWidth: 1, borderBottomColor: '#E4E1D2' },
-  back: { color: INK, fontSize: 30, lineHeight: 36, width: 20 },
-  headerTitle: { color: INK, fontSize: 16, fontWeight: '700' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E4E1D2', gap: 10 },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: INK, flex: 1, textAlign: 'center' },
   content: { flexGrow: 1, padding: 16, paddingBottom: 22, gap: 14 },
-  sessionCard: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 12, gap: 8 },
+  sessionCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, gap: 8 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   sessionTitle: { color: INK, fontSize: 11, fontWeight: '800', flex: 1 },
   confirmedBadge: { backgroundColor: PAGE, borderRadius: 10, paddingHorizontal: 7, paddingVertical: 3 },
@@ -182,18 +183,18 @@ const styles = StyleSheet.create({
   warningCard: { backgroundColor: '#FFF4F3', borderColor: '#F7B9B5', borderWidth: 1, borderRadius: 10, padding: 12, gap: 7 },
   warningTitle: { color: RED, fontSize: 11, fontWeight: '700', textAlign: 'center' },
   warningText: { color: '#514C67', fontSize: 9, lineHeight: 14 },
-  reasonCard: { backgroundColor: '#FFFFFF', borderRadius: 11, padding: 11, gap: 7 },
+  reasonCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, gap: 7 },
   sectionTitle: { color: INK, fontSize: 11, fontWeight: '700' },
   reasonInput: { minHeight: 70, borderRadius: 6, borderWidth: 1, borderColor: '#E3E3E3', backgroundColor: '#F5F5F5', color: INK, fontSize: 10, padding: 9 },
-  refundCard: { minHeight: 40, backgroundColor: '#FFFFFF', borderRadius: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  refundCard: { minHeight: 40, backgroundColor: '#FFFFFF', borderRadius: 16, paddingHorizontal: 12, borderWidth: 1, borderColor: '#EEEBDD', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   refundLabel: { color: INK, fontSize: 11, fontWeight: '700' },
   refundAmount: { color: TEAL, fontSize: 11, fontWeight: '800' },
   error: { color: '#B42318', fontSize: 11, textAlign: 'center' },
   actions: { gap: 8 },
-  cancelButton: { minHeight: 42, borderRadius: 9, backgroundColor: RED, alignItems: 'center', justifyContent: 'center' },
-  cancelText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
-  keepButton: { minHeight: 40, borderRadius: 9, borderWidth: 1.5, borderColor: TEAL, alignItems: 'center', justifyContent: 'center' },
-  keepText: { color: TEAL, fontSize: 12, fontWeight: '700' },
+  cancelButton: { backgroundColor: RED, borderRadius: 23, minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+  cancelText: { color: '#fff', fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
+  keepButton: { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: TEAL, borderRadius: 23, minHeight: 46, alignItems: 'center', justifyContent: 'center' },
+  keepText: { color: TEAL, fontSize: 13, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase' },
   sessionMeta: { color: MUTED, fontSize: 9, textAlign: 'center' },
   disabled: { opacity: 0.75 },
   pressed: { opacity: 0.82 },

@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -178,8 +179,8 @@ export default function ChatScreen() {
     try {
       const { data } = await api.post('/chat', { tutorId });
       router.push({ pathname: '/(tabs)/chat-conversation' as any, params: { convId: data._id } });
-    } catch {
-      router.push({ pathname: '/(tabs)/chat-conversation' as any, params: { tutorId } });
+    } catch (err: any) {
+      Alert.alert('Error', err?.response?.data?.message ?? 'Could not start conversation.');
     }
   };
 

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const attachmentSchema = new mongoose.Schema({
   name:     { type: String, default: '' },
-  fileType: { type: String, enum: ['document', 'image', 'code', 'video'], default: 'document' },
+  fileType: { type: String, enum: ['document', 'image', 'code', 'video', 'pdf'], default: 'document' },
   size:     { type: Number, default: 0 },
   content:  { type: String, default: '' }, // for code snippets
 }, { _id: false });
@@ -17,7 +17,7 @@ const messageSchema = new mongoose.Schema({
 
 const fileSchema = new mongoose.Schema({
   name:       { type: String, required: true },
-  fileType:   { type: String, enum: ['document', 'image', 'code', 'video'], required: true },
+  fileType:   { type: String, enum: ['document', 'image', 'code', 'video', 'pdf'], required: true },
   mimeType:   { type: String, default: '' },
   size:       { type: Number, default: 0 },
   content:    { type: String, default: '' },

@@ -10,6 +10,8 @@ const {
   confirmPayment,
   startSession,
   addMessage,
+  editMessage,
+  deleteMessage,
   addFile,
   completeSession,
   saveCodeSnapshot,
@@ -22,8 +24,10 @@ router.post('/',                          protect, createSession);
 router.get('/:id',                        protect, getSession);
 router.patch('/:id/confirm-payment', protect, confirmPayment);
 router.patch('/:id/start',           protect, startSession);
-router.post('/:id/message',          protect, addMessage);
-router.post('/:id/file',             protect, addFile);
+router.post('/:id/message',             protect, addMessage);
+router.patch('/:id/message/:msgId',    protect, editMessage);
+router.delete('/:id/message/:msgId',   protect, deleteMessage);
+router.post('/:id/file',               protect, addFile);
 router.patch('/:id/complete',        protect, completeSession);
 router.post('/:id/code',             protect, saveCodeSnapshot);
 

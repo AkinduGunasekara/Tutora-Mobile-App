@@ -213,6 +213,11 @@ export default function BookingsScreen() {
     // Already paid (simulated payment held in escrow) → go straight to the session
     try {
       const { data } = await api.get(`/session/by-booking/${booking._id}`);
+      if (data?.sessionStatus === 'completed') {
+        Alert.alert('Session Ended', 'This session has already been completed.');
+        await loadBookings();
+        return;
+      }
       if (data?.paymentStatus === 'in_escrow' || data?.paymentStatus === 'released') {
         router.push({
           pathname: '/(tabs)/session-booking-confirm' as any,

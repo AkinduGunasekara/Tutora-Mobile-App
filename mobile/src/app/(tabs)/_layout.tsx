@@ -6,7 +6,6 @@ import { useAuth } from '@/context/AuthContext';
 
 const TEAL  = '#008C91';
 const MUTED = '#78809A';
-const PAGE  = '#EFEDDC';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -49,7 +48,7 @@ export default function TabsLayout() {
         tabBarStyle: {
           borderTopWidth:    1,
           borderTopColor:    '#E4E1D2',
-          backgroundColor:   PAGE,
+          backgroundColor:   '#FFFFFF',
           paddingBottom:     Platform.OS === 'ios' ? 20 : 8,
           paddingTop:        6,
           height:            Platform.OS === 'ios' ? 84 : 64,

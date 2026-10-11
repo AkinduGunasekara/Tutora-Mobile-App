@@ -5,7 +5,9 @@
 //                                                 payments, messages and reviews from demo students
 //   node scripts/seed-demo.js --clean             remove all demo (@tutora.demo) and test (@tutora.test) data
 //
-// Demo accounts use the password Demo@1234. Dates are relative to today, so the data always looks current.
+// Main demo accounts: sachini@tutora.com / sachini123 (tutor) and kavindu@tutora.com / kavindu123 (student).
+// These two are kept between runs (only their activity is refreshed). Other demo accounts use Demo@1234.
+// Dates are relative to today, so the data always looks current.
 require('dotenv').config({ quiet: true });
 const mongoose = require('mongoose');
 const User = require('../src/modules/auth/User');
@@ -18,10 +20,11 @@ const { ensureSessionForBooking } = require('../src/shared/bookingSessionSync');
 const { parseDateKey, localDateKey, formatTime } = require('../src/shared/time');
 
 const PASSWORD = 'Demo@1234';
+const MAIN = /^(sachini|kavindu)@tutora\.com$/;
 const DEMO = /@tutora\.(demo|test)$/;
 
 const TUTORS = [
-  { name: 'Sachini Wijesinghe', email: 'sachini@tutora.demo', hourlyRate: 2500, subjects: ['Software Engineering', 'Programming', 'Algorithms', 'Data Structures'],
+  { name: 'Sachini Wijesinghe', email: 'sachini@tutora.com', password: 'sachini123', hourlyRate: 2500, subjects: ['Software Engineering', 'Programming', 'Algorithms', 'Data Structures'],
     bio: 'Final-year Software Engineering undergraduate who loves breaking down tough concepts into simple steps.',
     qualifications: ['BSc (Hons) Software Engineering - SLIIT (reading)', "Dean's List 2025", '2+ Years Tutoring Experience'], f2f: true },
   { name: 'Tharindu Senanayake', email: 'tharindu@tutora.demo', hourlyRate: 2000, subjects: ['Mathematics', 'Calculus', 'Linear Algebra', 'Statistics'],
@@ -42,14 +45,14 @@ const TUTORS = [
 ];
 
 const STUDENTS = [
-  ['Kavindu Perera', 'kavindu@tutora.demo', '2nd Year Undergraduate', 'Dept. of Computer Science'],
+  ['Kavindu Perera', 'kavindu@tutora.com', '2nd Year Undergraduate', 'Dept. of Computer Science', 'kavindu123'],
   ['Nethmi Silva', 'nethmi@tutora.demo', '1st Year Undergraduate', 'Dept. of Information Technology'],
   ['Kasun Perera', 'kasun@tutora.demo', '3rd Year Undergraduate', 'Dept. of Software Engineering'],
   ['Shahan Wickramasinghe', 'shahan@tutora.demo', '2nd Year Undergraduate', 'Dept. of Computer Science'],
   ['Minoli Fernando', 'minoli@tutora.demo', '2nd Year Undergraduate', 'Dept. of Data Science'],
   ['Dinuka Jayawardena', 'dinuka@tutora.demo', '3rd Year Undergraduate', 'Dept. of Information Technology'],
   ['Dilshan Kumara', 'dilshan@tutora.demo', '2nd Year Undergraduate', 'Dept. of Software Engineering'],
-].map(([name, email, year, degree]) => ({ name, email, year, degree }));
+].map(([name, email, year, degree, password]) => ({ name, email, year, degree, password }));
 
 const REVIEW_TEXT = [
   [5, 'Very helpful explanation and made the difficult concepts easier to understand.', ['Clear Explanation', 'Patient']],
@@ -74,10 +77,11 @@ const dayKey = (offset) => { const d = new Date(); d.setDate(d.getDate() + offse
 const initials = (name) => name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 const daysAgo = (n) => new Date(Date.now() - n * 86400000);
 
-const upsertUser = async (data, role) => {
+const upsertUser = async ({ password = PASSWORD, ...data }, role) => {
   let user = await User.findOne({ email: data.email });
-  if (!user) user = new User({ email: data.email, password: PASSWORD, role, name: data.name });
+  if (!user) user = new User({ email: data.email, password, role, name: data.name });
   Object.assign(user, data, { role });
+  if (!(await user.matchPassword(password))) user.password = password; // re-hashed on save
   await user.save();
   return user;
 };
@@ -192,7 +196,7 @@ const seedTutorActivity = async (tutor, s, { full }) => {
 
 // ── clean ─────────────────────────────────────────────────────────────────────
 
-const removeData = async (filterUsers) => {
+const removeData = async (filterUsers, { keepUsers = false } = {}) => {
   const users = await User.find(filterUsers).select('_id').lean();
   const ids = users.map((u) => u._id);
   if (!ids.length) return 0;
@@ -204,13 +208,13 @@ const removeData = async (filterUsers) => {
     CustomSessionRequest.deleteMany({ $or: [{ student: { $in: ids } }, { tutor: { $in: ids } }] }),
     TutorSettings.deleteMany({ tutor: { $in: ids } }),
   ]);
-  await User.deleteMany({ _id: { $in: ids } });
+  if (!keepUsers) await User.deleteMany({ _id: { $in: ids } });
   return ids.length;
 };
 
 // Removes only the demo students' activity with a real tutor (keeps the tutor's own account)
 const removeDemoActivityFor = async (tutor) => {
-  const demoStudents = (await User.find({ email: DEMO }).select('_id').lean()).map((u) => u._id);
+  const demoStudents = (await User.find({ $or: [{ email: DEMO }, { email: MAIN }] }).select('_id').lean()).map((u) => u._id);
   const bookings = await Booking.find({ 'tutor.userId': tutor._id, student: { $in: demoStudents } }).select('_id').lean();
   await Promise.all([
     Session.deleteMany({ bookingId: { $in: bookings.map((b) => String(b._id)) } }),
@@ -227,18 +231,19 @@ const removeDemoActivityFor = async (tutor) => {
   await mongoose.connect(process.env.MONGODB_URI);
 
   if (args.includes('--clean')) {
-    const n = await removeData({ email: DEMO });
+    const n = await removeData({ $or: [{ email: DEMO }, { email: MAIN }] });
     console.log(`Removed ${n} demo/test accounts and all their bookings, sessions, requests and reviews.`);
     return mongoose.disconnect();
   }
 
-  // Fresh demo data every run
+  // Fresh demo data every run (main accounts are kept, only their activity is reset)
   await removeData({ email: /@tutora\.demo$/ });
+  await removeData({ email: MAIN }, { keepUsers: true });
 
   const tutors = [];
   for (const t of TUTORS) {
     tutors.push(await upsertUser({
-      name: t.name, email: t.email, bio: t.bio, subjects: t.subjects, qualifications: t.qualifications,
+      name: t.name, email: t.email, password: t.password, bio: t.bio, subjects: t.subjects, qualifications: t.qualifications,
       hourlyRate: t.hourlyRate, onlineSessions: true, faceToFaceSessions: t.f2f, isVerified: true,
     }, 'tutor'));
   }
@@ -269,7 +274,7 @@ const removeDemoActivityFor = async (tutor) => {
   }
 
   console.log(`Seeded ${tutors.length} tutors and ${STUDENTS.length} students (password: ${PASSWORD}).`);
-  console.log('Main demo tutor: sachini@tutora.demo | demo student: kavindu@tutora.demo');
+  console.log('Main tutor: sachini@tutora.com / sachini123 | main student: kavindu@tutora.com / kavindu123');
   await mongoose.disconnect();
 })().catch(async (err) => {
   console.error('Seed failed:', err.message);

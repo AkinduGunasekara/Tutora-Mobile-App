@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 
 // WiFi IP for physical device testing — update if your network changes
-const DEV_IP = '192.168.8.156';
+const DEV_IP = '172.20.10.4';
 
 // On web the browser is on the same machine, so use localhost
 const BASE_URL =

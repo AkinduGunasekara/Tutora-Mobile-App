@@ -2,7 +2,7 @@ import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Alert, Pressable, StyleSheet, Text, View,
+  BackHandler, Pressable, StyleSheet, Text, View,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withTiming,
@@ -41,6 +41,15 @@ export default function SessionVideoScreen() {
   const liveDotStyle = useAnimatedStyle(() => ({ opacity: liveDotOp.value }));
 
   // Request permissions and start session on mount
+  // Block Android hardware back button during session
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      router.replace({ pathname: '/(tabs)/session-booking-confirm' as any, params: { sessionId } });
+      return true;
+    });
+    return () => sub.remove();
+  }, [sessionId]);
+
   useEffect(() => {
     liveDotOp.value = withRepeat(withTiming(0, { duration: 700 }), -1, true);
 
@@ -69,22 +78,11 @@ export default function SessionVideoScreen() {
   }, [sessionId]);
 
   const handleEndSession = () => {
-    Alert.alert(
-      'End Session',
-      'Are you sure you want to end this session? Payment will be released.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'End Session', style: 'destructive',
-          onPress: async () => {
-            setEnding(true);
-            if (timerRef.current) clearInterval(timerRef.current);
-            try { await api.patch(`/session/${sessionId}/complete`); } catch {}
-            router.replace({ pathname: '/(tabs)/session-completed' as any, params: { sessionId } });
-          },
-        },
-      ]
-    );
+    if (ending) return;
+    setEnding(true);
+    if (timerRef.current) clearInterval(timerRef.current);
+    api.patch(`/session/${sessionId}/complete`).catch(() => {});
+    router.replace({ pathname: '/(tabs)/session-completed' as any, params: { sessionId } });
   };
 
   const toggleCam = () => {
@@ -151,6 +149,12 @@ export default function SessionVideoScreen() {
       {/* ── Top bar ── */}
       <SafeAreaView style={styles.topOverlay} edges={['top']}>
         <View style={styles.topBar}>
+          <Pressable
+            style={styles.backBtn}
+            onPress={() => router.replace({ pathname: '/(tabs)/session-booking-confirm' as any, params: { sessionId } })}
+            hitSlop={10}>
+            <Text style={styles.backBtnText}>‹</Text>
+          </Pressable>
           <View style={styles.livePill}>
             <Animated.View style={[styles.liveDot, liveDotStyle]} />
             <Text style={styles.liveText}>LIVE</Text>
@@ -264,6 +268,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8,
   },
+  backBtn: {
+    backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 8,
+    width: 30, height: 30, alignItems: 'center', justifyContent: 'center',
+  },
+  backBtnText: { color: '#fff', fontSize: 22, fontWeight: '700', lineHeight: 26 },
   livePill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: 'rgba(239,68,68,0.9)', borderRadius: 8,

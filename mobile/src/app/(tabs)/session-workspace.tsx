@@ -26,7 +26,7 @@ const DEFAULT_CODE: Record<string, string> = {
 };
 
 export default function SessionWorkspaceScreen() {
-  const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
+  const { sessionId, from } = useLocalSearchParams<{ sessionId: string; from?: string }>();
 
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('Code');
   const [lang,  setLang]   = useState('JS');
@@ -58,7 +58,9 @@ export default function SessionWorkspaceScreen() {
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable onPress={() => from === 'session-completed'
+            ? router.replace({ pathname: '/(tabs)/session-completed' as any, params: { sessionId } })
+            : router.replace({ pathname: '/(tabs)/session-booking-confirm' as any, params: { sessionId } })} hitSlop={12}>
           <Ionicons name="chevron-back" size={22} color={INK} />
         </Pressable>
         <Text style={styles.headerTitle}>Session Workspace</Text>

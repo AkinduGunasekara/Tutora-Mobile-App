@@ -86,7 +86,7 @@ export default function SessionCodeScreen() {
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable onPress={() => router.replace({ pathname: '/(tabs)/session-booking-confirm' as any, params: { sessionId } })} hitSlop={12}>
           <Ionicons name="chevron-back" size={22} color="rgba(255,255,255,0.9)" />
         </Pressable>
         <Text style={styles.headerTitle}>Code Sandbox</Text>

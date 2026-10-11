@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator, Alert, Pressable, ScrollView,
-  StyleSheet, Text, View,
+  ActionSheetIOS, ActivityIndicator, Alert, Platform,
+  Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -46,21 +48,51 @@ export default function SessionFilesScreen() {
 
   useEffect(() => { if (sessionId) loadFiles(); }, [sessionId]);
 
-  const handleUpload = async () => {
-    const mockName = `file_${Date.now()}.pdf`;
+  const pickAndUpload = async (type: 'image' | 'document') => {
+    let fileName = '';
+    let fileType: string = type;
     try {
-      await api.post(`/session/${sessionId}/file`, { name: mockName, type: 'pdf' });
-      await loadFiles();
-    } catch {
-      Alert.alert('Upload failed', 'Could not upload file. Please try again.');
+      if (type === 'image') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') { Alert.alert('Permission needed', 'Allow photo access to upload images.'); return; }
+        const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+        if (result.canceled) return;
+        fileName = result.assets[0].fileName ?? `image_${Date.now()}.jpg`;
+        fileType  = 'image';
+      } else {
+        const result = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+        if (result.canceled) return;
+        fileName = result.assets[0].name;
+        fileType  = fileName.endsWith('.pdf') ? 'pdf' : 'document';
+      }
+    } catch (e: any) {
+      Alert.alert('Picker error', e?.message ?? 'Could not open file picker.');
+      return;
     }
+
+    if (!fileName) return;
+
+    try {
+      await api.post(`/session/${sessionId}/file`, { name: fileName, type: fileType });
+      await loadFiles();
+    } catch (e: any) {
+      Alert.alert('Upload failed', e?.response?.data?.message ?? 'Could not upload file.');
+    }
+  };
+
+  const handleUpload = () => {
+    Alert.alert('Upload File', 'Choose file type', [
+      { text: 'Image', onPress: () => pickAndUpload('image') },
+      { text: 'Document / PDF', onPress: () => pickAndUpload('document') },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable onPress={() => router.replace({ pathname: '/(tabs)/session-booking-confirm' as any, params: { sessionId } })} hitSlop={12}>
           <Ionicons name="chevron-back" size={22} color={INK} />
         </Pressable>
         <View style={styles.headerCenter}>

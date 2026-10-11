@@ -173,6 +173,40 @@ exports.addMessage = async (req, res) => {
   }
 };
 
+// PATCH /api/session/:id/message/:msgId
+exports.editMessage = async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text?.trim()) return res.status(400).json({ message: 'Text is required' });
+    const session = await loadOwnSession(req, res);
+    if (!session) return;
+    const msg = session.messages.id(req.params.msgId);
+    if (!msg) return res.status(404).json({ message: 'Message not found' });
+    if (msg.sender.toString() !== req.user.id) return res.status(403).json({ message: 'Not your message' });
+    msg.text = text.trim();
+    await session.save();
+    res.json(msg);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// DELETE /api/session/:id/message/:msgId
+exports.deleteMessage = async (req, res) => {
+  try {
+    const session = await loadOwnSession(req, res);
+    if (!session) return;
+    const msg = session.messages.id(req.params.msgId);
+    if (!msg) return res.status(404).json({ message: 'Message not found' });
+    if (msg.sender.toString() !== req.user.id) return res.status(403).json({ message: 'Not your message' });
+    msg.deleteOne();
+    await session.save();
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 // POST /api/session/:id/file
 exports.addFile = async (req, res) => {
   try {

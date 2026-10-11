@@ -140,15 +140,20 @@ export default function ChatConversationScreen() {
   const { convId } = useLocalSearchParams<{ convId: string }>();
   const { user }   = useAuth();
 
-  const [conv,         setConv]         = useState<any>(null);
-  const [loading,      setLoading]      = useState(true);
-  const [text,         setText]         = useState('');
-  const [sending,      setSending]      = useState(false);
-  const [showAttach,   setShowAttach]   = useState(false);
-  const [showCodeModal,setShowCodeModal]= useState(false);
+  const [conv,          setConv]         = useState<any>(null);
+  const [loading,       setLoading]      = useState(true);
+  const [text,          setText]         = useState('');
+  const [sending,       setSending]      = useState(false);
+  const [showAttach,    setShowAttach]   = useState(false);
+  const [showCodeModal, setShowCodeModal]= useState(false);
+  const [editingMsg,    setEditingMsg]   = useState<any>(null);
+  const [selectedMsg,   setSelectedMsg]  = useState<any>(null);
+  const [showMsgMenu,   setShowMsgMenu]  = useState(false);
 
-  const listRef  = useRef<FlatList>(null);
-  const pollRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const listRef     = useRef<FlatList>(null);
+  const pollRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const inputRef    = useRef<TextInput>(null);
+  const mutatingRef = useRef(false);
 
   const fetchConv = useCallback(async (quiet = false) => {
     if (!convId) return;
@@ -163,7 +168,9 @@ export default function ChatConversationScreen() {
   useEffect(() => { fetchConv(); }, [fetchConv]);
 
   useEffect(() => {
-    pollRef.current = setInterval(() => fetchConv(true), 3000);
+    pollRef.current = setInterval(() => {
+      if (!mutatingRef.current) fetchConv(true);
+    }, 3000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [fetchConv]);
 
@@ -176,13 +183,56 @@ export default function ChatConversationScreen() {
   const send = async () => {
     const trimmed = text.trim();
     if (!trimmed || sending) return;
-    setSending(true);
     setText('');
+
+    if (editingMsg) {
+      const msgId = editingMsg._id;
+      setEditingMsg(null);
+      mutatingRef.current = true;
+      // Optimistic update
+      setConv((prev: any) => prev ? {
+        ...prev,
+        messages: prev.messages.map((m: any) => m._id === msgId ? { ...m, text: trimmed } : m),
+      } : prev);
+      try {
+        await api.patch(`/chat/${convId}/message/${msgId}`, { text: trimmed });
+      } catch (err: any) {
+        Alert.alert('Edit failed', err?.response?.data?.message ?? 'Could not edit message.');
+      }
+      await fetchConv(true);
+      mutatingRef.current = false;
+      return;
+    }
+
+    setSending(true);
     try {
       await api.post(`/chat/${convId}/message`, { text: trimmed });
       await fetchConv(true);
     } catch { setText(trimmed); }
     finally { setSending(false); }
+  };
+
+  const handleDelete = async (msg: any) => {
+    setShowMsgMenu(false);
+    mutatingRef.current = true;
+    // Optimistic removal
+    setConv((prev: any) => prev ? {
+      ...prev,
+      messages: prev.messages.filter((m: any) => m._id !== msg._id),
+    } : prev);
+    try {
+      await api.delete(`/chat/${convId}/message/${msg._id}`);
+    } catch (err: any) {
+      Alert.alert('Delete failed', err?.response?.data?.message ?? String(err));
+    }
+    await fetchConv(true);
+    mutatingRef.current = false;
+  };
+
+  const handleLongPress = (msg: any) => {
+    if (String(msg.sender?._id ?? msg.sender) !== String(user?.id)) return;
+    setSelectedMsg(msg);
+    setShowMsgMenu(true);
   };
 
   const shareFile = async (payload: object) => {
@@ -265,7 +315,10 @@ export default function ChatConversationScreen() {
     const isMine = String(msg.sender?._id ?? msg.sender) === String(user?.id);
 
     return (
-      <View style={[styles.bubbleWrap, isMine && styles.bubbleWrapMine]}>
+      <Pressable
+        onLongPress={() => handleLongPress(msg)}
+        delayLongPress={400}
+        style={[styles.bubbleWrap, isMine && styles.bubbleWrapMine]}>
         {!isMine && (
           <Text style={styles.senderName}>{msg.sender?.name ?? otherName}</Text>
         )}
@@ -277,7 +330,7 @@ export default function ChatConversationScreen() {
           </View>
         )}
         <Text style={[styles.timeText, isMine && styles.timeTextMine]}>{formatTime(msg.sentAt)}</Text>
-      </View>
+      </Pressable>
     );
   };
 
@@ -351,14 +404,30 @@ export default function ChatConversationScreen() {
           />
         )}
 
+        {/* Edit banner */}
+        {editingMsg && (
+          <View style={styles.editBanner}>
+            <Ionicons name="pencil-outline" size={14} color={TEAL} />
+            <Text style={styles.editBannerText} numberOfLines={1}>
+              Editing: {editingMsg.text}
+            </Text>
+            <Pressable
+              hitSlop={8}
+              onPress={() => { setEditingMsg(null); setText(''); }}>
+              <Ionicons name="close-circle" size={18} color={MUTED} />
+            </Pressable>
+          </View>
+        )}
+
         {/* Input bar */}
         <View style={styles.inputRow}>
           <Pressable style={styles.attachBtn} onPress={() => setShowAttach(true)}>
             <Ionicons name="add" size={22} color={TEAL} />
           </Pressable>
           <TextInput
+            ref={inputRef}
             style={styles.input}
-            placeholder="Type a message..."
+            placeholder={editingMsg ? 'Edit your message...' : 'Type a message...'}
             placeholderTextColor={MUTED}
             value={text}
             onChangeText={setText}
@@ -371,11 +440,42 @@ export default function ChatConversationScreen() {
             disabled={!text.trim() || sending}>
             {sending
               ? <ActivityIndicator color="#fff" size="small" />
-              : <Ionicons name="send" size={16} color="#fff" />
+              : <Ionicons name={editingMsg ? 'checkmark' : 'send'} size={16} color="#fff" />
             }
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Message options modal */}
+      <Modal visible={showMsgMenu} transparent animationType="fade">
+        <Pressable style={styles.msgMenuOverlay} onPress={() => setShowMsgMenu(false)} />
+        <View style={styles.msgMenuBox}>
+          <Text style={styles.msgMenuPreview} numberOfLines={2}>{selectedMsg?.text}</Text>
+          <Pressable
+            style={styles.msgMenuOption}
+            onPress={() => {
+              setShowMsgMenu(false);
+              setEditingMsg(selectedMsg);
+              setText(selectedMsg?.text ?? '');
+              setTimeout(() => inputRef.current?.focus(), 100);
+            }}>
+            <Ionicons name="pencil-outline" size={18} color={TEAL} />
+            <Text style={styles.msgMenuOptionText}>Edit Message</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.msgMenuOption, { borderTopWidth: 1, borderTopColor: '#F0EFE8' }]}
+            onPress={() => selectedMsg && handleDelete(selectedMsg)}>
+            <Ionicons name="trash-outline" size={18} color="#EF4444" />
+            <Text style={[styles.msgMenuOptionText, { color: '#EF4444' }]}>Delete Message</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.msgMenuOption, { borderTopWidth: 1, borderTopColor: '#F0EFE8' }]}
+            onPress={() => setShowMsgMenu(false)}>
+            <Ionicons name="close-outline" size={18} color={MUTED} />
+            <Text style={[styles.msgMenuOptionText, { color: MUTED }]}>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
 
       {/* Attachment sheet */}
       <Modal visible={showAttach} transparent animationType="slide">
@@ -511,6 +611,30 @@ const styles = StyleSheet.create({
     backgroundColor: TEAL, alignItems: 'center', justifyContent: 'center',
   },
   sendBtnDisabled: { backgroundColor: '#B0D4D6' },
+
+  editBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: '#FFF8E1', borderTopWidth: 1, borderTopColor: '#FFE082',
+    paddingHorizontal: 14, paddingVertical: 8,
+  },
+  editBannerText: { flex: 1, fontSize: 12, color: INK, fontStyle: 'italic' },
+
+  // Message options modal
+  msgMenuOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
+  msgMenuBox: {
+    backgroundColor: CARD, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    padding: 16,
+  },
+  msgMenuPreview: {
+    fontSize: 12, color: MUTED, fontStyle: 'italic',
+    marginBottom: 12, paddingBottom: 12,
+    borderBottomWidth: 1, borderBottomColor: '#F0EFE8',
+  },
+  msgMenuOption: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 14,
+  },
+  msgMenuOptionText: { fontSize: 14, fontWeight: '600', color: INK },
 
   // Attachment sheet
   sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },

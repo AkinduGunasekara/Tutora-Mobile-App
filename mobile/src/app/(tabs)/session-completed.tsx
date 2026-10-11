@@ -46,7 +46,19 @@ export default function SessionCompletedScreen() {
     if (rating === 0) { Alert.alert('Rating required', 'Please select a star rating.'); return; }
     setSubmitting(true);
     try {
+      // Save rating to session document
       await api.patch(`/session/${sessionId}/complete`, { rating, review });
+
+      // Also post to Review collection so tutor profile rating updates
+      const tutorId = session?.tutor?._id;
+      if (tutorId) {
+        await api.post(`/discovery/tutor/${tutorId}/reviews`, {
+          rating,
+          comment: review,
+          sessionId,
+        });
+      }
+
       setSubmitted(true);
       Alert.alert('Thank you!', 'Your review has been submitted.');
     } catch {
@@ -149,7 +161,7 @@ export default function SessionCompletedScreen() {
         {/* Actions */}
         <Pressable
           style={({ pressed }) => [styles.outlineBtn, pressed && { opacity: 0.75 }]}
-          onPress={() => router.push({ pathname: '/(tabs)/session-workspace' as any, params: { sessionId } })}>
+          onPress={() => router.push({ pathname: '/(tabs)/session-workspace' as any, params: { sessionId, from: 'session-completed' } })}>
           <Text style={styles.outlineBtnText}>View Session Materials</Text>
         </Pressable>
 
